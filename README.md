@@ -2,7 +2,10 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository for **DropFix** backend project.
+DropFix is your solution to unexpected car troubles. Whether you're facing a dead battery, overheating engine, or any other car issue, DropFix
+connects you with skilled service providers who come to your location and fix your car on the spot. Need a tow? No worries. DropFix also offers
+on-demand towing services to transport your car to the nearest mechanical shop. With a seamless app experience, instant service requests, and reliable
+professionals, DropFix ensures you're back on the road in no time. Drive with confidence, knowing that help is just a tap away.
 
 ## Installation
 
