@@ -25,7 +25,7 @@ async function bootstrap(): Promise<void> {
   // Create the Swagger documentation configuration
   const config = new DocumentBuilder()
     .setTitle(process.env.APP_TITLE || 'DropFix')
-    .setDescription(process.env.APP_DESCRIPTION || 'DropFix backend endpoints.')
+    .setDescription(process.env.SWAGGER_DESCRIPTION || 'DropFix API Documentation & Backend Endpoints.')
     .setVersion(process.env.APP_VERSION || '0.0.1')
     .build();
 
