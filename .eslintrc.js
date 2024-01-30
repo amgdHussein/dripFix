@@ -61,7 +61,7 @@ module.exports = {
       // Enforce that all variables are either in camelCase or UPPER_CASE
       {
         selector: 'variable',
-        format: ['camelCase', 'UPPER_CASE'],
+        format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
       },
 
       // Boolean variables prefix
