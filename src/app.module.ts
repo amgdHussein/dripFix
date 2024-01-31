@@ -1,17 +1,20 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { APP_FILTER } from '@nestjs/core';
 import { APP_LOGGER } from './core/constants';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { APP_FILTER } from '@nestjs/core';
 import { AppExceptionFilter } from './core/filters';
+import { AuthModule } from './core/auth';
+
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
     //? Core
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
