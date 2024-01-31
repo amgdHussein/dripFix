@@ -14,6 +14,7 @@ export class AuthStrategy extends PassportStrategy(Strategy, AUTH_STRATEGY) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.GCLOUD_PRIVATE_KEY,
     });
   }
 

@@ -34,8 +34,8 @@ export class AuthService {
 
         throw new UnauthorizedException('Unverified user!');
       })
-      .catch(() => {
-        // this.logger.error(error);
+      .catch(error => {
+        console.log('🚀 ~ AuthService ~ validateUser ~ error:', error);
         throw new UnauthorizedException('User not authenticated!');
       });
   }
