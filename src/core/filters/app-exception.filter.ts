@@ -4,9 +4,9 @@ import { Injectable, ExceptionFilter, HttpException, ArgumentsHost, HttpStatus, 
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Response } from 'express';
 
-import { ForbiddenException, NotFoundException } from '../exceptions';
+import { ForbiddenException, NotFoundException, UnauthorizedException } from '../exceptions';
 
-type AppException = ForbiddenException | NotFoundException;
+type AppException = ForbiddenException | NotFoundException | UnauthorizedException;
 
 @Injectable()
 @Catch(HttpException)

@@ -13,9 +13,9 @@ export class AuthService {
   constructor() {
     this.app = firebase.initializeApp({
       credential: firebase.credential.cert({
-        projectId: String(process.env.GCLOUD_PROJECT_ID),
-        clientEmail: String(process.env.GCLOUD_CLIENT_EMAIL),
-        privateKey: String(process.env.GCLOUD_PRIVATE_KEY),
+        projectId: process.env.GCLOUD_PROJECT_ID,
+        clientEmail: process.env.GCLOUD_CLIENT_EMAIL,
+        privateKey: process.env.GCLOUD_PRIVATE_KEY,
       }),
     });
   }
