@@ -5,6 +5,8 @@ import { APP_LOGGER } from './core/constants';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { APP_FILTER } from '@nestjs/core';
+import { AppExceptionFilter } from './core/filters';
 
 @Module({
   imports: [
@@ -17,7 +19,10 @@ import { AppService } from './app.service';
       provide: APP_LOGGER,
       useClass: Logger,
     },
-
+    {
+      provide: APP_FILTER,
+      useClass: AppExceptionFilter,
+    },
     AppService,
   ],
 })
