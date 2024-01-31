@@ -4,6 +4,7 @@ import * as firebase from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 
 import { UnauthorizedException } from '../exceptions';
+import { Role } from '../constants';
 
 @Injectable()
 export class AuthService {
@@ -37,5 +38,21 @@ export class AuthService {
         // this.logger.error(error);
         throw new UnauthorizedException('User not authenticated!');
       });
+  }
+
+  /**
+   * Validates if the user has the required roles.
+   * @param {Role[]} userRoles - The roles of the user
+   * @param {Role[]} requiredRoles - The required roles
+   * @return {boolean} Whether the user has the required roles
+   */
+  public validateUserRole(userRoles: Role[], requiredRoles: Role[]): boolean {
+    const hasRole = userRoles.some(role => requiredRoles.includes(role));
+
+    if (userRoles.length === 0 && !hasRole) {
+      throw new UnauthorizedException('User does not have required roles!');
+    }
+
+    return hasRole;
   }
 }
