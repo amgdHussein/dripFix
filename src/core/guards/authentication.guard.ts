@@ -3,10 +3,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 
 import { PUBLIC_ACCESS } from '../decorators';
-import { AUTH_STRATEGY } from '../constants';
+import { AUTH_STRATEGY_PROVIDER } from '../constants';
 
 @Injectable()
-export class AuthenticationGuard extends AuthGuard(AUTH_STRATEGY) {
+export class AuthenticationGuard extends AuthGuard(AUTH_STRATEGY_PROVIDER) {
   constructor(private readonly reflector: Reflector) {
     super();
   }

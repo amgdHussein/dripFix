@@ -4,12 +4,12 @@ import { Reflector } from '@nestjs/core';
 import { AuthService } from '../auth';
 
 import { PUBLIC_ACCESS, ROLE_ACCESS } from '../decorators';
-import { AUTH_SERVICE, Role } from '../constants';
+import { AUTH_SERVICE_PROVIDER, Role } from '../constants';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
-    @Inject(AUTH_SERVICE)
+    @Inject(AUTH_SERVICE_PROVIDER)
     private readonly authService: AuthService,
     private readonly reflector: Reflector,
   ) {}

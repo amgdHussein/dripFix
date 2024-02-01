@@ -4,12 +4,12 @@ import { ExtractJwt, Strategy } from 'passport-firebase-jwt';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 
 import { AuthService } from './auth.service';
-import { AUTH_SERVICE, AUTH_STRATEGY } from '../constants';
+import { AUTH_SERVICE_PROVIDER, AUTH_STRATEGY_PROVIDER } from '../constants';
 
 @Injectable()
-export class AuthStrategy extends PassportStrategy(Strategy, AUTH_STRATEGY) {
+export class AuthStrategy extends PassportStrategy(Strategy, AUTH_STRATEGY_PROVIDER) {
   constructor(
-    @Inject(AUTH_SERVICE)
+    @Inject(AUTH_SERVICE_PROVIDER)
     private authService: AuthService,
   ) {
     super({

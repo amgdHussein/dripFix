@@ -51,6 +51,12 @@ module.exports = {
     'dot-notation': 'off',
     '@typescript-eslint/dot-notation': 'error',
 
+    // Enable namespace
+    '@typescript-eslint/no-namespace': 'off',
+
+    // Enable inferrable types
+    '@typescript-eslint/no-inferrable-types': 'off',
+
     // Prevents conditionals where the type is always truthy or always falsy
     // '@typescript-eslint/no-unnecessary-condition': 'error',
 
