@@ -13,8 +13,4 @@ export class AppService {
   public getHello(): string {
     return 'Hello World!';
   }
-
-  public addUser(user: any): any {
-    return this.collection.addDoc(user);
-  }
 }

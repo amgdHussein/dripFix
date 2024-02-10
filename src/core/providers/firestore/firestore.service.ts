@@ -1,14 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Injectable } from '@nestjs/common';
-import { CollectionReference, DocumentSnapshot, Query, WithFieldValue } from '@google-cloud/firestore';
+import { CollectionReference, Query, FieldValue, WithFieldValue, PartialWithFieldValue, QueryDocumentSnapshot } from '@google-cloud/firestore';
 
 import { ObjectUtils } from '../../utils';
-import { InternalServerErrorException, NotFoundException } from '../../exceptions';
+import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
 
 import { QueryFilter, QueryOrder, QueryResponse } from './entities';
-
-const MAX_QUERY_LIMIT: number = 100;
 
 @Injectable()
 export class FirestoreCollectionService<T extends { id: string }> {
@@ -19,10 +15,10 @@ export class FirestoreCollectionService<T extends { id: string }> {
     /**
      * Drop id and undefined fields if exists
      * Convert object notation to dot notation
-     * @param {T} entity Entity to set/ update
+     * @param {WithFieldValue<T>} entity Entity to set/ update
      * @return {T} The data provided to firestore
      */
-    toFirestore(entity: T): WithFieldValue<T> {
+    toFirestore(entity: WithFieldValue<T>): PartialWithFieldValue<T> {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...entityWithoutId } = entity;
 
@@ -31,12 +27,12 @@ export class FirestoreCollectionService<T extends { id: string }> {
 
     /**
      * Converts a Firestore document snapshot to a custom type.
-     * @param {DocumentSnapshot<T>} doc - The Firestore document snapshot to convert
-     * @return {T} The converted custom type
+     * @param {QueryDocumentSnapshot<T>} snapshot - The Firestore document snapshot to convert
+     * @return {T & { id: string }} The converted custom type
      */
-    fromFirestore(doc: DocumentSnapshot<T>): T {
-      const data = doc.data() as T;
-      return { ...data, id: doc.id };
+    fromFirestore(snapshot: QueryDocumentSnapshot<T>): T & { id: string } {
+      const data = snapshot.data();
+      return { ...data, id: snapshot.id };
     },
   };
 
@@ -48,14 +44,14 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T>} The retrieved document
    */
   public async getDoc(id: string): Promise<T> {
-    const docRef = this.collection.doc(id);
+    const docRef = this.collection.doc(id).withConverter<T>(this.firestoreConverter);
     const doc = await docRef.get();
 
     if (!doc.exists) {
       throw new NotFoundException(`The ${this.collectionName} with specified id(${id}) does not exist!`);
     }
 
-    return this.firestoreConverter.fromFirestore(doc);
+    return doc.data();
   }
 
   /**
@@ -63,11 +59,10 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T[]>} description of return value
    */
   public async getDocs(): Promise<T[]> {
-    return await this.collection
+    const query = this.collection.withConverter<T>(this.firestoreConverter);
+    return await query
       .get()
-      .then(snapshot => {
-        return snapshot.docs.map(doc => this.firestoreConverter.fromFirestore(doc));
-      })
+      .then(snapshot => snapshot.docs.map(doc => doc.data()))
       .catch(error => {
         console.log('🚀 ~ getDocs ~ error:', error);
         throw new InternalServerErrorException('Something went wrong while fetching the documents!');
@@ -80,11 +75,11 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T>} a promise that resolves with the added entity
    */
   public async addDoc(entity: T): Promise<T> {
-    const docRef = this.collection.doc();
+    const docRef = this.collection.doc().withConverter<T>(this.firestoreConverter);
 
     return await docRef
-      .set(this.firestoreConverter.toFirestore(entity))
-      .then(async () => await this.getDoc(docRef.id))
+      .set(entity)
+      .then(() => ({ ...entity, id: docRef.id }))
       .catch(error => {
         console.log('🚀 ~ addDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while adding new ${this.collectionName} document!`);
@@ -97,11 +92,11 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T>} The new document data
    */
   public async setDoc(entity: T): Promise<T> {
-    const docRef = this.collection.doc(entity.id);
+    const docRef = this.collection.doc(entity.id).withConverter<T>(this.firestoreConverter);
 
     return await docRef
-      .set(this.firestoreConverter.toFirestore(entity))
-      .then(async () => await this.getDoc(docRef.id))
+      .set(entity)
+      .then(() => ({ ...entity, id: docRef.id }))
       .catch(error => {
         console.log('🚀 ~ setDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while replacing ${this.collectionName} document!`);
@@ -117,9 +112,9 @@ export class FirestoreCollectionService<T extends { id: string }> {
   public async updateDoc(entity: Partial<T> & { id: string }): Promise<T> {
     const flatEntity = ObjectUtils.flatten(entity);
 
-    const docRef = this.collection.doc(entity.id);
+    const docRef = this.collection.doc(entity.id).withConverter<T>(this.firestoreConverter);
     return await docRef
-      .update(this.firestoreConverter.toFirestore(flatEntity))
+      .update(flatEntity)
       .then(async () => await this.getDoc(docRef.id))
       .catch(error => {
         console.log('🚀 ~ updateDoc ~ error:', error);
@@ -133,7 +128,7 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T>} The deleted document data
    */
   public async deleteDoc(id: string): Promise<T> {
-    const entity: T = await this.getDoc(id); // throw error if the id not exist
+    const entity: T = await this.getDoc(id); // Throw error if the id not exist
 
     const docRef = this.collection.doc(id);
     return await docRef
@@ -154,11 +149,21 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<QueryResponse<T>>} The query documents data and meta data
    */
   public async query(page: number = 1, limit: number = 30, filters?: QueryFilter[], orderBy?: QueryOrder): Promise<QueryResponse<T>> {
-    limit = Math.min(limit, MAX_QUERY_LIMIT);
+    let queries: Query<T> = this.buildQuery(filters).withConverter<T>(this.firestoreConverter);
 
-    const query: Query<T> = this.initiateQueries(filters);
-    const data: T[] = await this.getQueries(page, limit, query, orderBy);
-    const entities: number = (await query.count().get()).data().count;
+    if (orderBy) queries = queries.orderBy(orderBy.field, orderBy.direction);
+    if (page > 0 && limit > 0) queries = queries.offset(limit * (page - 1));
+    if (limit > 0) queries = queries.limit(limit);
+
+    const data: T[] = await queries
+      .get()
+      .then(snapshot => snapshot.docs.map(doc => doc.data()))
+      .catch(error => {
+        console.log('🚀 ~ getQueries ~ error:', error);
+        throw new InternalServerErrorException('An error occurred while querying data!');
+      });
+
+    const entities: number = (await queries.count().get()).data().count;
 
     return {
       data: data, // items
@@ -170,36 +175,11 @@ export class FirestoreCollectionService<T extends { id: string }> {
   }
 
   /**
-   * Executes the query and returns the results as a list of entities.
-   * @param {number} page Pagination to prevent data overload
-   * @param {number} limit Number of entities per page
-   * @param {Query} query Firestore query object used to fetch documents
-   * @param {QueryOrder} orderBy Order object that contains {field, direction} to sort by field in specified direction
-   * @return {Array<T>} The query documents data
-   */
-  private async getQueries(page: number, limit: number, query: Query<T>, orderBy?: QueryOrder): Promise<T[]> {
-    if (orderBy) query = query.orderBy(orderBy.field, orderBy.direction);
-
-    query = query.offset(limit * (page - 1));
-    query = query.limit(limit);
-
-    return await query
-      .get()
-      .then(snapshot => {
-        return snapshot.docs.map(doc => this.firestoreConverter.fromFirestore(doc));
-      })
-      .catch(error => {
-        console.log('🚀 ~ getQueries ~ error:', error);
-        throw new InternalServerErrorException('An error occurred while querying data!');
-      });
-  }
-
-  /**
    * Create queries by applying filters
    * @param {Array<QueryFilter>} filters List of filters to be applied
    * @return {Query<T>} Query object that meets filters
    */
-  private initiateQueries(filters?: QueryFilter[]): Query<T> {
+  private buildQuery(filters?: QueryFilter[]): Query<T> {
     let query: Query<T> = this.collection;
 
     if (filters && filters.length > 0) {
@@ -209,5 +189,57 @@ export class FirestoreCollectionService<T extends { id: string }> {
     }
 
     return query;
+  }
+
+  /**
+   * Increment a specific field of a document by a certain value.
+   * @param {string} id - The ID of the document to be updated
+   * @param {string} field - The name of the field to be incremented
+   * @param {number} incrementValue - The value by which the field should be incremented
+   * @return {Promise<T>} A promise that resolves to the updated document
+   */
+  public async incrementField(id: string, field: string, incrementValue: number): Promise<T> {
+    const docRef = this.collection.doc(id);
+
+    const entity: T = await this.getDoc(id); // Throw error if the id not exist
+
+    if (!entity[field]) {
+      throw new BadRequestException(`Field ${field} does not exist!`);
+    }
+
+    if (incrementValue <= 0) {
+      throw new BadRequestException('Increment value must be greater than 0!');
+    }
+
+    return await docRef
+      .update(field, FieldValue.increment(incrementValue))
+      .then(() => {
+        return { ...entity, [field]: entity[field] + incrementValue };
+      })
+      .catch(error => {
+        console.log('🚀 ~ incrementField ~ error:', error);
+        throw new InternalServerErrorException(`An error occurred while incrementing ${field}!`);
+      });
+  }
+
+  /**
+   * A function that creates a nested Firestore collection service based on the given path.
+   * @param {string} path - the path of the nested collection
+   * @return {FirestoreCollectionService<T & { id: string }>} a Firestore collection service for the nested collection
+   */
+  public nestedCollection<T>(path: string): FirestoreCollectionService<T & { id: string }> {
+    const parts = path.split('/');
+
+    if (parts.length === 0 || parts.length % 2 !== 0) {
+      throw new BadRequestException('Invalid path!');
+    }
+
+    const docPath: string = parts.shift() as string;
+    const collectionPath: string = parts.join('/');
+
+    const docRef = this.collection.doc(docPath);
+    const collection = docRef.collection(collectionPath) as CollectionReference<T & { id: string }>;
+
+    return new FirestoreCollectionService<T & { id: string }>(collection);
   }
 }
