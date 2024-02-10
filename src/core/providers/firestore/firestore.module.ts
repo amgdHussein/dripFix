@@ -3,7 +3,7 @@ import { Firestore, Settings, CollectionReference, DocumentData } from '@google-
 
 import { DB_OPTIONS_PROVIDER, DB_PROVIDER, DB_COLLECTION_PROVIDER } from '../../constants';
 
-import { FirestoreCollectionService } from './firestore.service';
+import { FirestoreService } from './firestore.service';
 import { FirestoreModuleOptions } from './firestore.config';
 
 @Module({})
@@ -30,9 +30,9 @@ export class FirestoreModule {
     const collectionProviders: Provider[] = Object.values(DB_COLLECTION_PROVIDER).map((collectionProvider: string): Provider => {
       return {
         provide: collectionProvider,
-        useFactory: <T>(database: Firestore): FirestoreCollectionService<T & { id: string }> => {
+        useFactory: <T>(database: Firestore): FirestoreService<T & { id: string }> => {
           const collection = database.collection(collectionProvider) as CollectionReference<T & { id: string }, DocumentData>;
-          return new FirestoreCollectionService(collection);
+          return new FirestoreService(collection);
         },
         inject: [DB_PROVIDER],
       };

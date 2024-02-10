@@ -1,5 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CollectionReference, Query, FieldValue, WithFieldValue, PartialWithFieldValue, QueryDocumentSnapshot } from '@google-cloud/firestore';
+
+import {
+  CollectionReference,
+  Query,
+  QueryDocumentSnapshot,
+  FieldValue,
+  FirestoreDataConverter,
+  WithFieldValue,
+  PartialWithFieldValue,
+} from '@google-cloud/firestore';
 
 import { ObjectUtils } from '../../utils';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
@@ -7,22 +16,19 @@ import { BadRequestException, InternalServerErrorException, NotFoundException } 
 import { QueryFilter, QueryOrder, QueryResponse } from './entities';
 
 @Injectable()
-export class FirestoreCollectionService<T extends { id: string }> {
+export class FirestoreService<T extends { id: string }> {
   // Convert collection name into capitalized singular name (ex. users => user)
-  private collectionName: string = this.collection.id.slice(0, -1);
+  private readonly collectionName: string = this.collection.id.slice(0, -1);
 
-  private readonly firestoreConverter = {
+  private readonly firestoreConverter: FirestoreDataConverter<T> = {
     /**
      * Drop id and undefined fields if exists
-     * Convert object notation to dot notation
      * @param {WithFieldValue<T>} entity Entity to set/ update
      * @return {T} The data provided to firestore
      */
     toFirestore(entity: WithFieldValue<T>): PartialWithFieldValue<T> {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...entityWithoutId } = entity;
-
-      return ObjectUtils.dropUndefined(entityWithoutId);
+      delete entity.id;
+      return ObjectUtils.dropUndefined(entity);
     },
 
     /**
@@ -96,7 +102,7 @@ export class FirestoreCollectionService<T extends { id: string }> {
 
     return await docRef
       .set(entity)
-      .then(() => ({ ...entity, id: docRef.id }))
+      .then(() => entity)
       .catch(error => {
         console.log('🚀 ~ setDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while replacing ${this.collectionName} document!`);
@@ -128,7 +134,7 @@ export class FirestoreCollectionService<T extends { id: string }> {
    * @return {Promise<T>} The deleted document data
    */
   public async deleteDoc(id: string): Promise<T> {
-    const entity: T = await this.getDoc(id); // Throw error if the id not exist
+    const entity = await this.getDoc(id); // Throw error if the id not exist
 
     const docRef = this.collection.doc(id);
     return await docRef
@@ -225,9 +231,9 @@ export class FirestoreCollectionService<T extends { id: string }> {
   /**
    * A function that creates a nested Firestore collection service based on the given path.
    * @param {string} path - the path of the nested collection
-   * @return {FirestoreCollectionService<T & { id: string }>} a Firestore collection service for the nested collection
+   * @return {FirestoreService<T & { id: string }>} a Firestore collection service for the nested collection
    */
-  public nestedCollection<T>(path: string): FirestoreCollectionService<T & { id: string }> {
+  public nestedCollection<T>(path: string): FirestoreService<T & { id: string }> {
     const parts = path.split('/');
 
     if (parts.length === 0 || parts.length % 2 !== 0) {
@@ -240,6 +246,6 @@ export class FirestoreCollectionService<T extends { id: string }> {
     const docRef = this.collection.doc(docPath);
     const collection = docRef.collection(collectionPath) as CollectionReference<T & { id: string }>;
 
-    return new FirestoreCollectionService<T & { id: string }>(collection);
+    return new FirestoreService<T & { id: string }>(collection);
   }
 }
