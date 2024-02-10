@@ -26,18 +26,16 @@ export class AuthService {
    * @return {Promise<DecodedIdToken>} the decoded ID token
    */
   public async validateUser(token: string): Promise<DecodedIdToken> {
-    return await this.app
+    const claims = await this.app
       .auth()
       .verifyIdToken(token, true)
-      .then(claims => {
-        if (claims.email_verified) return claims;
-
-        throw new UnauthorizedException('Unverified user!');
-      })
       .catch(error => {
         console.log('🚀 ~ AuthService ~ validateUser ~ error:', error);
         throw new UnauthorizedException('User not authenticated!');
       });
+
+    if (claims.email_verified) return claims;
+    throw new UnauthorizedException('Unverified user, please verify your email!');
   }
 
   /**
