@@ -23,10 +23,14 @@ export class AppExceptionFilter implements ExceptionFilter<AppException> {
     const request: Request = context.getRequest<Request>();
     const status: number = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    // Get the cause of the error (custom exception or validation pipe exception)
+    const exceptionResponse = exception.getResponse();
+    const cause: string | string[] = (exception.cause as Error)?.message || (exceptionResponse as any)?.message || exceptionResponse;
+
     response.status(status).json({
       statusCode: status,
-      message: exception.message.trim(),
-      cause: (exception as any)?.cause?.message,
+      message: exception.message,
+      cause: cause,
       method: request.method,
       path: request.url,
       timestamp: new Date().toISOString(),
