@@ -1,14 +1,14 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { APP_LOGGER_PROVIDER } from './core/constants';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { LOGGER_PROVIDER } from './core/constants';
 
 import { AuthModule } from './core/auth';
 import { AuthenticationGuard } from './core/guards';
 import { AppExceptionFilter } from './core/filters';
 
-import { FirestoreModule } from './core/providers/firestore';
+import { HttpModule, RedisModule, FirestoreModule } from './core/providers';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
@@ -29,13 +29,25 @@ import { AppController } from './app.controller';
         },
       }),
     }),
+
+    RedisModule.forRoot({
+      host: process.env.REDIS_HOST,
+      port: +process.env.REDIS_PORT,
+    }),
+
+    HttpModule.forRoot({
+      useFactory: () => ({
+        timeout: +process.env.HTTP_TIMEOUT,
+        maxRedirects: +process.env.HTTP_MAX_REDIRECTS,
+      }),
+    }),
   ],
 
   controllers: [AppController],
 
   providers: [
     {
-      provide: APP_LOGGER_PROVIDER,
+      provide: LOGGER_PROVIDER,
       useClass: Logger,
     },
     {
@@ -45,6 +57,14 @@ import { AppController } from './app.controller';
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        disableErrorMessages: false,
+        whitelist: true,
+        transform: true,
+      }),
     },
     AppService,
   ],

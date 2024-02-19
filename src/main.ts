@@ -10,11 +10,11 @@ async function bootstrap(): Promise<void> {
 
   // Set up basic authentication for the API endpoints [Swagger]
   app.use(
-    [process.env.SWAGGER_PATH || 'api'],
+    ['/api', '/api-json'],
     basicAuth({
       challenge: true,
       users: {
-        [process.env.SWAGGER_USER || 'admin']: process.env.SWAGGER_PASSWORD || 'admin',
+        [process.env.SWAGGER_USER]: process.env.SWAGGER_PASSWORD,
       },
     }),
   );
@@ -24,18 +24,18 @@ async function bootstrap(): Promise<void> {
 
   // Create the Swagger documentation configuration
   const config = new DocumentBuilder()
-    .setTitle(process.env.APP_TITLE || 'DropFix')
-    .setDescription(process.env.SWAGGER_DESCRIPTION || 'DropFix API Documentation & Backend Endpoints.')
-    .setVersion(process.env.APP_VERSION || '0.0.1')
+    .setTitle(process.env.APP_TITLE)
+    .setDescription(process.env.SWAGGER_DESCRIPTION)
+    .setVersion(process.env.APP_VERSION)
     .build();
 
   // Generate the Swagger document based on the application and configuration
   const document = SwaggerModule.createDocument(app, config);
 
   // Set up the Swagger UI to serve the generated documentation
-  SwaggerModule.setup(process.env.SWAGGER_PATH || 'api', app, document);
+  SwaggerModule.setup('api', app, document);
 
   // Start the application server
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT);
 }
 bootstrap();

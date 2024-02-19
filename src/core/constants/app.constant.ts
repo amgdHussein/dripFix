@@ -1,4 +1,7 @@
-export const APP_LOGGER_PROVIDER = 'APP_LOGGER';
+export const LOGGER_PROVIDER = 'LOGGER';
+
+export const HTTP_PROVIDER = 'HTTP';
+export const REDIS_CACHE_PROVIDER = 'REDIS_CACHE';
 
 export const AUTH_SERVICE_PROVIDER = 'AUTH_SERVICE';
 export const AUTH_STRATEGY_PROVIDER = 'AUTH_STRATEGY';
