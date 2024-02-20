@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import {
   CollectionReference,
@@ -70,7 +70,7 @@ export class FirestoreService<T extends { id: string }> {
       .get()
       .then(snapshot => snapshot.docs.map(doc => doc.data()))
       .catch(error => {
-        console.log('🚀 ~ getDocs ~ error:', error);
+        Logger.error('🚀 ~ getDocs ~ error:', error);
         throw new InternalServerErrorException('Something went wrong while fetching the documents!');
       });
   }
@@ -87,7 +87,7 @@ export class FirestoreService<T extends { id: string }> {
       .set(entity)
       .then(() => ({ ...entity, id: docRef.id }))
       .catch(error => {
-        console.log('🚀 ~ addDoc ~ error:', error);
+        Logger.error('🚀 ~ addDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while adding new ${this.collectionName} document!`);
       });
   }
@@ -104,7 +104,7 @@ export class FirestoreService<T extends { id: string }> {
       .set(entity)
       .then(() => entity)
       .catch(error => {
-        console.log('🚀 ~ setDoc ~ error:', error);
+        Logger.error('🚀 ~ setDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while replacing ${this.collectionName} document!`);
       });
   }
@@ -123,7 +123,7 @@ export class FirestoreService<T extends { id: string }> {
       .update(flatEntity)
       .then(async () => await this.getDoc(docRef.id))
       .catch(error => {
-        console.log('🚀 ~ updateDoc ~ error:', error);
+        Logger.error('🚀 ~ updateDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while updating ${this.collectionName} document!`);
       });
   }
@@ -141,7 +141,7 @@ export class FirestoreService<T extends { id: string }> {
       .delete()
       .then(() => entity)
       .catch(error => {
-        console.log('🚀 ~ deleteDoc ~ error:', error);
+        Logger.error('🚀 ~ deleteDoc ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while deleting ${this.collectionName} document!`);
       });
   }
@@ -156,6 +156,7 @@ export class FirestoreService<T extends { id: string }> {
    */
   public async query(page: number = 1, limit: number = 30, filters?: QueryFilter[], orderBy?: QueryOrder): Promise<QueryResponse<T>> {
     let queries: Query<T> = this.buildQuery(filters).withConverter<T>(this.firestoreConverter);
+    const entities: number = (await queries.count().get()).data().count;
 
     if (orderBy) queries = queries.orderBy(orderBy.field, orderBy.direction);
     if (page > 0 && limit > 0) queries = queries.offset(limit * (page - 1));
@@ -165,11 +166,9 @@ export class FirestoreService<T extends { id: string }> {
       .get()
       .then(snapshot => snapshot.docs.map(doc => doc.data()))
       .catch(error => {
-        console.log('🚀 ~ getQueries ~ error:', error);
+        Logger.error('🚀 ~ getQueries ~ error:', error);
         throw new InternalServerErrorException('An error occurred while querying data!');
       });
-
-    const entities: number = (await queries.count().get()).data().count;
 
     return {
       data: data, // items
@@ -223,7 +222,7 @@ export class FirestoreService<T extends { id: string }> {
         return { ...entity, [field]: entity[field] + incrementValue };
       })
       .catch(error => {
-        console.log('🚀 ~ incrementField ~ error:', error);
+        Logger.error('🚀 ~ incrementField ~ error:', error);
         throw new InternalServerErrorException(`An error occurred while incrementing ${field}!`);
       });
   }

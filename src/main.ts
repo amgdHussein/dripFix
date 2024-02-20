@@ -36,6 +36,6 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('api', app, document);
 
   // Start the application server
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.APP_PORT);
 }
 bootstrap();

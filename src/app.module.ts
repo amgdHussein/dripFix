@@ -1,17 +1,17 @@
-import { Logger, Module, ValidationPipe } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
-import { LOGGER_PROVIDER } from './core/constants';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
 import { AuthModule } from './core/auth';
 import { AuthenticationGuard } from './core/guards';
-import { AppExceptionFilter } from './core/filters';
+import { ExceptionFilter } from './core/filters';
 
 import { HttpModule, RedisModule, FirestoreModule } from './core/providers';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { LoggingInterceptor } from './core/interceptors';
 
 @Module({
   imports: [
@@ -47,16 +47,16 @@ import { AppController } from './app.controller';
 
   providers: [
     {
-      provide: LOGGER_PROVIDER,
-      useClass: Logger,
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
     {
       provide: APP_FILTER,
-      useClass: AppExceptionFilter,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: AuthenticationGuard,
+      useClass: ExceptionFilter,
     },
     {
       provide: APP_PIPE,

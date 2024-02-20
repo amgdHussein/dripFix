@@ -1,5 +1,3 @@
-export const LOGGER_PROVIDER = 'LOGGER';
-
 export const HTTP_PROVIDER = 'HTTP';
 export const REDIS_CACHE_PROVIDER = 'REDIS_CACHE';
 

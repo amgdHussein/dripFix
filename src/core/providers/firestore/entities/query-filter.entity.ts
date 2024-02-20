@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { WhereFilterOp as FilterOperator } from '@google-cloud/firestore';
 
-import { WhereFilterOp } from '@google-cloud/firestore';
+export { FilterOperator };
 
 export interface QueryFilter {
   field: string;
-  operator: WhereFilterOp;
-  value: any;
+  operator: FilterOperator;
+  value: unknown;
 }

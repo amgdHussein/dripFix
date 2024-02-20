@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Injectable, ExceptionFilter, HttpException, ArgumentsHost, HttpStatus, Catch } from '@nestjs/common';
+import { Injectable, ExceptionFilter as NestExceptionFilter, HttpException, ArgumentsHost, HttpStatus, Catch } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Response } from 'express';
 
@@ -10,7 +10,7 @@ type AppException = ForbiddenException | NotFoundException | UnauthorizedExcepti
 
 @Injectable()
 @Catch(HttpException)
-export class AppExceptionFilter implements ExceptionFilter<AppException> {
+export class ExceptionFilter implements NestExceptionFilter<AppException> {
   /**
    * Handles the caught exception and sends an appropriate JSON response.
    * @param {AppException} exception - the caught exception
@@ -26,10 +26,11 @@ export class AppExceptionFilter implements ExceptionFilter<AppException> {
     // Get the cause of the error (custom exception or validation pipe exception)
     const exceptionResponse = exception.getResponse();
     const cause: string | string[] = (exception.cause as Error)?.message || (exceptionResponse as any)?.message || exceptionResponse;
+    const message: string = (exceptionResponse as any)?.error || exception.message || exceptionResponse;
 
     response.status(status).json({
       statusCode: status,
-      message: exception.message,
+      message: message,
       cause: cause,
       method: request.method,
       path: request.url,
