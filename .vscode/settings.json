@@ -31,5 +31,5 @@
   "typelens.unusedcolor": "None",
 
   // Unknown words
-  "cSpell.words": ["amgad", "datasource", "datasources", "dtos", "firestore", "gcloud", "nestjs", "usecases"]
+  "cSpell.words": ["amgad", "datasource", "datasources", "dtos", "firestore", "gcloud", "nestjs", "redishost", "redisport", "usecases"]
 }

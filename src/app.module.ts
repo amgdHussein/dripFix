@@ -6,12 +6,11 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './core/auth';
 import { ExceptionFilter } from './core/filters';
 import { AuthenticationGuard } from './core/guards';
-
+import { LoggingInterceptor, ResponseInterceptor } from './core/interceptors';
 import { FirestoreModule, HttpModule, RedisModule } from './core/providers';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoggingInterceptor } from './core/interceptors';
 
 @Module({
   imports: [
@@ -31,8 +30,8 @@ import { LoggingInterceptor } from './core/interceptors';
     }),
 
     RedisModule.forRoot({
-      host: process.env.REDIS_HOST,
-      port: +process.env.REDIS_PORT,
+      host: process.env.REDISHOST,
+      port: +process.env.REDISPORT,
     }),
 
     HttpModule.forRoot({
@@ -51,6 +50,14 @@ import { LoggingInterceptor } from './core/interceptors';
       useClass: AuthenticationGuard,
     },
     {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        disableErrorMessages: false,
+        whitelist: true,
+        transform: true,
+      }),
+    },
+    {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
@@ -59,13 +66,10 @@ import { LoggingInterceptor } from './core/interceptors';
       useClass: ExceptionFilter,
     },
     {
-      provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        disableErrorMessages: false,
-        whitelist: true,
-        transform: true,
-      }),
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
+
     AppService,
   ],
 })
