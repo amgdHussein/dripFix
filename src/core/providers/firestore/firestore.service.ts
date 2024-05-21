@@ -2,16 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import {
   CollectionReference,
-  Query,
-  QueryDocumentSnapshot,
   FieldValue,
   FirestoreDataConverter,
-  WithFieldValue,
   PartialWithFieldValue,
+  Query,
+  QueryDocumentSnapshot,
+  WithFieldValue,
 } from '@google-cloud/firestore';
 
-import { ObjectUtils } from '../../utils';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
+import { Utils } from '../../utils';
 
 import { QueryFilter, QueryOrder, QueryResponse } from './entities';
 
@@ -19,6 +19,7 @@ import { QueryFilter, QueryOrder, QueryResponse } from './entities';
 export class FirestoreService<T extends { id: string }> {
   // Convert collection name into capitalized singular name (ex. users => user)
   private readonly collectionName: string = this.collection.id.slice(0, -1);
+  private readonly logger = new Logger(FirestoreService.name);
 
   private readonly firestoreConverter: FirestoreDataConverter<T> = {
     /**
@@ -27,8 +28,9 @@ export class FirestoreService<T extends { id: string }> {
      * @return {T} The data provided to firestore
      */
     toFirestore(entity: WithFieldValue<T>): PartialWithFieldValue<T> {
-      delete entity.id;
-      return ObjectUtils.dropUndefined(entity);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...data } = entity;
+      return Utils.Object.dropUndefined(data);
     },
 
     /**
@@ -70,7 +72,7 @@ export class FirestoreService<T extends { id: string }> {
       .get()
       .then(snapshot => snapshot.docs.map(doc => doc.data()))
       .catch(error => {
-        Logger.error('🚀 ~ getDocs ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException('Something went wrong while fetching the documents!');
       });
   }
@@ -87,7 +89,7 @@ export class FirestoreService<T extends { id: string }> {
       .set(entity)
       .then(() => ({ ...entity, id: docRef.id }))
       .catch(error => {
-        Logger.error('🚀 ~ addDoc ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while adding new ${this.collectionName} document!`);
       });
   }
@@ -104,8 +106,36 @@ export class FirestoreService<T extends { id: string }> {
       .set(entity)
       .then(() => entity)
       .catch(error => {
-        Logger.error('🚀 ~ setDoc ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while replacing ${this.collectionName} document!`);
+      });
+  }
+
+  /**
+   * Add multiple documents to the specified CollectionReference with the given data array.
+   * @param {Array<object>} entities Array of document data to be added (Ids not required)
+   * @return {Promise<Array<object>>} Array of new document data
+   * @example await setDocs([
+   *   {'username':'Ahmed', 'age': 23},
+   *   {'username':'Ali', 'age': 30},
+   * ])
+   */
+  public async setDocs(entities: Array<T>): Promise<Array<T>> {
+    // const docRef = this.collection.doc();
+    const docRef = this.collection.doc().withConverter<T>(this.firestoreConverter);
+    const batch = docRef.firestore.batch();
+
+    const addedDocs = entities.map(entity => {
+      batch.set(docRef, entity);
+      return { id: docRef.id, ...entity };
+    });
+
+    return await batch
+      .commit()
+      .then(() => addedDocs)
+      .catch(error => {
+        this.logger.error(error);
+        throw new InternalServerErrorException(`An error occurred while adding multiple ${this.collectionName}.`);
       });
   }
 
@@ -116,14 +146,14 @@ export class FirestoreService<T extends { id: string }> {
    * @return {Promise<T>} The updated document data
    */
   public async updateDoc(entity: Partial<T> & { id: string }): Promise<T> {
-    const flatEntity = ObjectUtils.flatten(entity);
+    const flatEntity = Utils.Object.flat(entity);
 
     const docRef = this.collection.doc(entity.id).withConverter<T>(this.firestoreConverter);
     return await docRef
       .update(flatEntity)
       .then(async () => await this.getDoc(docRef.id))
       .catch(error => {
-        Logger.error('🚀 ~ updateDoc ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while updating ${this.collectionName} document!`);
       });
   }
@@ -141,7 +171,7 @@ export class FirestoreService<T extends { id: string }> {
       .delete()
       .then(() => entity)
       .catch(error => {
-        Logger.error('🚀 ~ deleteDoc ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while deleting ${this.collectionName} document!`);
       });
   }
@@ -166,7 +196,7 @@ export class FirestoreService<T extends { id: string }> {
       .get()
       .then(snapshot => snapshot.docs.map(doc => doc.data()))
       .catch(error => {
-        Logger.error('🚀 ~ getQueries ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException('An error occurred while querying data!');
       });
 
@@ -222,7 +252,7 @@ export class FirestoreService<T extends { id: string }> {
         return { ...entity, [field]: entity[field] + incrementValue };
       })
       .catch(error => {
-        Logger.error('🚀 ~ incrementField ~ error:', error);
+        this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while incrementing ${field}!`);
       });
   }

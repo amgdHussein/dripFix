@@ -1,10 +1,10 @@
-import { Module, DynamicModule, Provider } from '@nestjs/common';
-import { Firestore, Settings, CollectionReference, DocumentData } from '@google-cloud/firestore';
+import { CollectionReference, DocumentData, Firestore, Settings } from '@google-cloud/firestore';
+import { DynamicModule, Module, Provider } from '@nestjs/common';
 
-import { DB_OPTIONS_PROVIDER, DB_PROVIDER, DB_COLLECTION_PROVIDER } from '../../constants';
+import { DB_COLLECTION_PROVIDER, DB_OPTIONS_PROVIDER, DB_PROVIDER } from '../../constants';
 
-import { FirestoreService } from './firestore.service';
 import { FirestoreModuleOptions } from './firestore.config';
+import { FirestoreService } from './firestore.service';
 
 @Module({})
 export class FirestoreModule {
@@ -41,6 +41,7 @@ export class FirestoreModule {
     const targetModule: DynamicModule = {
       global: true,
       module: FirestoreModule,
+      imports: options.imports,
       providers: [optionsProvider, databaseProvider, ...collectionProviders],
       exports: [databaseProvider, ...collectionProviders],
     };

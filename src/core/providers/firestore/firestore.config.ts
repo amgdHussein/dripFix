@@ -3,6 +3,7 @@
 import { Settings } from '@google-cloud/firestore';
 
 export interface FirestoreModuleOptions {
+  imports?: any[];
   useFactory: (
     projectId: string,
     credentials: {
