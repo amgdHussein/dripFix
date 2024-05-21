@@ -1,5 +1,5 @@
-import { Module, DynamicModule, Provider } from '@nestjs/common';
-import { HttpModule as NestHttpModule, HttpModuleAsyncOptions, HttpService } from '@nestjs/axios';
+import { HttpModuleAsyncOptions, HttpService, HttpModule as NestHttpModule } from '@nestjs/axios';
+import { DynamicModule, Module, Provider } from '@nestjs/common';
 
 import { HTTP_PROVIDER } from '../../constants';
 
