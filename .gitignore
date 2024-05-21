@@ -40,3 +40,6 @@ dump.rdb
 # Project
 .env
 token-generator.html
+src/core/utils/query-string.util.ts
+src/core/auth/user-claims.service.ts
+test/test.ts
