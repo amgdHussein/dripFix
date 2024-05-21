@@ -3,8 +3,8 @@ import { Reflector } from '@nestjs/core';
 
 import { AuthService } from '../auth';
 
-import { PUBLIC_ACCESS, ROLE_ACCESS } from '../decorators';
 import { AUTH_SERVICE_PROVIDER, Role } from '../constants';
+import { PUBLIC_ACCESS, ROLE_ACCESS } from '../decorators';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -13,6 +13,7 @@ export class RolesGuard implements CanActivate {
     private readonly authService: AuthService,
     private readonly reflector: Reflector,
   ) {}
+
   /**
    * Check if the user can access the specified context based on their roles and permissions.
    * @param {ExecutionContext} context - the context in which the access is being checked

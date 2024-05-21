@@ -4,13 +4,13 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
 import { AuthModule } from './core/auth';
-import { AuthenticationGuard } from './core/guards';
 import { ExceptionFilter } from './core/filters';
+import { AuthenticationGuard } from './core/guards';
 
-import { HttpModule, RedisModule, FirestoreModule } from './core/providers';
+import { FirestoreModule, HttpModule, RedisModule } from './core/providers';
 
-import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { LoggingInterceptor } from './core/interceptors';
 
 @Module({

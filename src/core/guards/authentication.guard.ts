@@ -1,9 +1,9 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
-import { PUBLIC_ACCESS } from '../decorators';
 import { AUTH_STRATEGY_PROVIDER } from '../constants';
+import { PUBLIC_ACCESS } from '../decorators';
 
 @Injectable()
 export class AuthenticationGuard extends AuthGuard(AUTH_STRATEGY_PROVIDER) {
