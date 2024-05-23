@@ -37,6 +37,7 @@
     "firebase-admin": "^12.0.0",
     "passport": "^0.7.0",
     "passport-firebase-jwt": "^1.2.1",
+    "prisma": "^5.14.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
