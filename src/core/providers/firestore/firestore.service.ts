@@ -7,19 +7,31 @@ import {
   PartialWithFieldValue,
   Query,
   QueryDocumentSnapshot,
+  WhereFilterOp,
   WithFieldValue,
 } from '@google-cloud/firestore';
 
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
 import { Utils } from '../../utils';
 
-import { QueryFilter, QueryOrder, QueryResponse } from './entities';
+import { FilterOp, SearchFilter, SearchOrder, SearchResult } from '../../shared';
 
 @Injectable()
 export class FirestoreService<T extends { id: string }> {
   // Convert collection name into capitalized singular name (ex. users => user)
   private readonly collectionName: string = this.collection.id.slice(0, -1);
   private readonly logger = new Logger(FirestoreService.name);
+
+  private readonly filterOpToFirestoreOp: { [key in FilterOp]: WhereFilterOp } = {
+    eq: '==',
+    neq: '!=',
+    gt: '>',
+    gte: '>=',
+    lt: '<',
+    lte: '<=',
+    in: 'in',
+    nin: 'not-in',
+  };
 
   private readonly firestoreConverter: FirestoreDataConverter<T> = {
     /**
@@ -180,11 +192,11 @@ export class FirestoreService<T extends { id: string }> {
    * Executes the query and returns the results as a QuerySnapshot.
    * @param {number} page Pagination to prevent data overload
    * @param {number} limit Number of entities per page
-   * @param {Array<QueryFilter>} filters - List of QueryFilter each filter has its own {field, operator, value}
-   * @param {QueryOrder} orderBy - Order object that contains {field, direction} to sort by field in specified direction
-   * @return {Promise<QueryResponse<T>>} The query documents data and meta data
+   * @param {Array<SearchFilter>} filters - List of SearchFilter each filter has its own {field, operator, value}
+   * @param {SearchOrder} orderBy - Order object that contains {field, direction} to sort by field in specified direction
+   * @return {Promise<SearchResult<T>>} The query documents data and meta data
    */
-  public async query(page: number = 1, limit: number = 30, filters?: QueryFilter[], orderBy?: QueryOrder): Promise<QueryResponse<T>> {
+  public async query(page: number = 1, limit: number = 30, filters?: SearchFilter[], orderBy?: SearchOrder): Promise<SearchResult<T>> {
     let queries: Query<T> = this.buildQuery(filters).withConverter<T>(this.firestoreConverter);
     const entities: number = (await queries.count().get()).data().count;
 
@@ -201,7 +213,7 @@ export class FirestoreService<T extends { id: string }> {
       });
 
     return {
-      data: data, // items
+      output: data, // items
       page: page, // current page
       pages: Math.ceil(entities / limit), // number of pages
       per_page: limit, // number of items per page
@@ -211,15 +223,15 @@ export class FirestoreService<T extends { id: string }> {
 
   /**
    * Create queries by applying filters
-   * @param {Array<QueryFilter>} filters List of filters to be applied
+   * @param {Array<SearchFilter>} filters List of filters to be applied
    * @return {Query<T>} Query object that meets filters
    */
-  private buildQuery(filters?: QueryFilter[]): Query<T> {
+  private buildQuery(filters?: SearchFilter[]): Query<T> {
     let query: Query<T> = this.collection;
 
     if (filters && filters.length > 0) {
       for (const filter of filters) {
-        query = query.where(filter.field, filter.operator, filter.value);
+        query = query.where(filter.field, this.filterOpToFirestoreOp[filter.operator], filter.value);
       }
     }
 
