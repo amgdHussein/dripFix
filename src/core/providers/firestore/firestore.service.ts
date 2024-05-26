@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 
 import {
   CollectionReference,
+  DocumentData,
   FieldValue,
+  Firestore,
   FirestoreDataConverter,
   PartialWithFieldValue,
   Query,
@@ -14,15 +16,16 @@ import {
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
 import { Utils } from '../../utils';
 
-import { FilterOp, SearchFilter, SearchOrder, SearchResult } from '../../shared';
+import { QueryOp, QueryOrder, QueryParam, SearchResult } from '../../shared';
 
-@Injectable()
 export class FirestoreService<T extends { id: string }> {
-  // Convert collection name into capitalized singular name (ex. users => user)
-  private readonly collectionName: string = this.collection.id.slice(0, -1);
   private readonly logger = new Logger(FirestoreService.name);
 
-  private readonly filterOpToFirestoreOp: { [key in FilterOp]: WhereFilterOp } = {
+  private readonly collection = this.firestore.collection(this.collectionProvider) as CollectionReference<T & { id: string }, DocumentData>;
+
+  private readonly collectionName: string = this.collectionProvider.slice(0, -1);
+
+  private readonly filterOpToFirestoreOp: { [key in QueryOp]: WhereFilterOp } = {
     eq: '==',
     neq: '!=',
     gt: '>',
@@ -31,6 +34,8 @@ export class FirestoreService<T extends { id: string }> {
     lte: '<=',
     in: 'in',
     nin: 'not-in',
+    arcoay: 'array-contains-any',
+    arco: 'array-contains',
   };
 
   private readonly firestoreConverter: FirestoreDataConverter<T> = {
@@ -56,7 +61,10 @@ export class FirestoreService<T extends { id: string }> {
     },
   };
 
-  constructor(private readonly collection: CollectionReference<T>) {}
+  constructor(
+    private readonly firestore: Firestore,
+    private readonly collectionProvider: string,
+  ) {}
 
   /**
    * Retrieves a document with the specified id from the collection.
@@ -94,12 +102,12 @@ export class FirestoreService<T extends { id: string }> {
    * @param {T} entity - the entity to be added
    * @return {Promise<T>} a promise that resolves with the added entity
    */
-  public async addDoc(entity: T): Promise<T> {
-    const docRef = this.collection.doc().withConverter<T>(this.firestoreConverter);
+  public async addDoc(entity: Partial<T>): Promise<T> {
+    const docRef = this.collection.doc().withConverter<Partial<T>>(this.firestoreConverter);
 
     return await docRef
       .set(entity)
-      .then(() => ({ ...entity, id: docRef.id }))
+      .then(() => ({ ...entity, id: docRef.id }) as T)
       .catch(error => {
         this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while adding new ${this.collectionName} document!`);
@@ -124,27 +132,24 @@ export class FirestoreService<T extends { id: string }> {
   }
 
   /**
-   * Add multiple documents to the specified CollectionReference with the given data array.
-   * @param {Array<object>} entities Array of document data to be added (Ids not required)
-   * @return {Promise<Array<object>>} Array of new document data
-   * @example await setDocs([
-   *   {'username':'Ahmed', 'age': 23},
-   *   {'username':'Ali', 'age': 30},
-   * ])
+   * Adds multiple documents to the specified CollectionReference with the given data, assigning them document IDs automatically.
+   *
+   * @param {Partial<T>[]} entities - Array of document data to be added (Id not required)
+   * @return {Promise<T[]>} Promise that resolves to an array of the new document data
+   * @throws {InternalServerErrorException} If an error occurs while adding the documents
    */
-  public async setDocs(entities: Array<T>): Promise<Array<T>> {
-    // const docRef = this.collection.doc();
+  public async setDocs(entities: Partial<T>[]): Promise<T[]> {
     const docRef = this.collection.doc().withConverter<T>(this.firestoreConverter);
     const batch = docRef.firestore.batch();
 
     const addedDocs = entities.map(entity => {
-      batch.set(docRef, entity);
+      batch.set(docRef, entity as T);
       return { id: docRef.id, ...entity };
     });
 
     return await batch
       .commit()
-      .then(() => addedDocs)
+      .then(() => addedDocs as T[])
       .catch(error => {
         this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while adding multiple ${this.collectionName}.`);
@@ -171,6 +176,30 @@ export class FirestoreService<T extends { id: string }> {
   }
 
   /**
+   * Updates multiple documents in the Firestore collection.
+   *
+   * @param {(Partial<T> & { id: string })[]} entities - An array of partial entities with their IDs.
+   * @return {Promise<T[]>} A promise that resolves to true if the update is successful, or rejects with an error.
+   */
+  public async updateDocs(entities: (Partial<T> & { id: string })[]): Promise<T[]> {
+    const batch = this.collection.firestore.batch();
+
+    entities.map(entity => {
+      const docRef = this.collection.doc(entity.id).withConverter<T>(this.firestoreConverter);
+      const flatEntity = Utils.Object.flat(entity);
+      batch.update(docRef, flatEntity);
+    });
+
+    return await batch
+      .commit()
+      .then(() => entities as T[])
+      .catch(error => {
+        Logger.error(error);
+        throw new InternalServerErrorException(`An error occurred while adding multiple ${this.collectionName}.`);
+      });
+  }
+
+  /**
    * Deletes the document referred to by the specified DocumentReference.
    * @param {string} id The ID of the document to be deleted
    * @return {Promise<T>} The deleted document data
@@ -192,15 +221,15 @@ export class FirestoreService<T extends { id: string }> {
    * Executes the query and returns the results as a QuerySnapshot.
    * @param {number} page Pagination to prevent data overload
    * @param {number} limit Number of entities per page
-   * @param {Array<SearchFilter>} filters - List of SearchFilter each filter has its own {field, operator, value}
-   * @param {SearchOrder} orderBy - Order object that contains {field, direction} to sort by field in specified direction
+   * @param {Array<QueryParam>} filters - List of QueryParam each filter has its own {field, operator, value}
+   * @param {QueryOrder} orderBy - Order object that contains {field, direction} to sort by field in specified direction
    * @return {Promise<SearchResult<T>>} The query documents data and meta data
    */
-  public async query(page: number = 1, limit: number = 30, filters?: SearchFilter[], orderBy?: SearchOrder): Promise<SearchResult<T>> {
-    let queries: Query<T> = this.buildQuery(filters).withConverter<T>(this.firestoreConverter);
+  public async query(page: number = 1, limit: number = 30, params?: QueryParam[], orderBy?: QueryOrder): Promise<SearchResult<T>> {
+    let queries: Query<T> = this.buildQuery(params).withConverter<T>(this.firestoreConverter);
     const entities: number = (await queries.count().get()).data().count;
 
-    if (orderBy) queries = queries.orderBy(orderBy.field, orderBy.direction);
+    if (orderBy) queries = queries.orderBy(orderBy.key, orderBy.dir);
     if (page > 0 && limit > 0) queries = queries.offset(limit * (page - 1));
     if (limit > 0) queries = queries.limit(limit);
 
@@ -223,15 +252,15 @@ export class FirestoreService<T extends { id: string }> {
 
   /**
    * Create queries by applying filters
-   * @param {Array<SearchFilter>} filters List of filters to be applied
+   * @param {Array<QueryParam>} filters List of filters to be applied
    * @return {Query<T>} Query object that meets filters
    */
-  private buildQuery(filters?: SearchFilter[]): Query<T> {
+  private buildQuery(params?: QueryParam[]): Query<T> {
     let query: Query<T> = this.collection;
 
-    if (filters && filters.length > 0) {
-      for (const filter of filters) {
-        query = query.where(filter.field, this.filterOpToFirestoreOp[filter.operator], filter.value);
+    if (params && params.length > 0) {
+      for (const queryParam of params) {
+        query = query.where(queryParam.key, this.filterOpToFirestoreOp[queryParam.operator], queryParam.value);
       }
     }
 
@@ -267,26 +296,5 @@ export class FirestoreService<T extends { id: string }> {
         this.logger.error(error);
         throw new InternalServerErrorException(`An error occurred while incrementing ${field}!`);
       });
-  }
-
-  /**
-   * A function that creates a nested Firestore collection service based on the given path.
-   * @param {string} path - the path of the nested collection
-   * @return {FirestoreService<T & { id: string }>} a Firestore collection service for the nested collection
-   */
-  public nestedCollection<T>(path: string): FirestoreService<T & { id: string }> {
-    const parts = path.split('/');
-
-    if (parts.length === 0 || parts.length % 2 !== 0) {
-      throw new BadRequestException('Invalid path!');
-    }
-
-    const docPath: string = parts.shift() as string;
-    const collectionPath: string = parts.join('/');
-
-    const docRef = this.collection.doc(docPath);
-    const collection = docRef.collection(collectionPath) as CollectionReference<T & { id: string }>;
-
-    return new FirestoreService<T & { id: string }>(collection);
   }
 }

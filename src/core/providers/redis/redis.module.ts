@@ -4,7 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import type { RedisClientOptions } from 'redis';
 
-import { REDIS_CACHE_PROVIDER } from '../../constants';
+import { REDIS_PROVIDER } from '../../constants';
 
 import { RedisService } from './redis.service';
 
@@ -22,7 +22,7 @@ export class RedisModule {
    */
   public static forRoot(options: CacheOptions): DynamicModule {
     const redisProvider: Provider = {
-      provide: REDIS_CACHE_PROVIDER,
+      provide: REDIS_PROVIDER,
       useClass: RedisService,
     };
 

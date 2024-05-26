@@ -125,7 +125,7 @@ module.exports = {
           accessors: 'explicit',
           constructors: 'no-public',
           methods: 'explicit',
-          properties: 'explicit',
+          properties: 'implicit',
           parameterProperties: 'explicit',
         },
       },
