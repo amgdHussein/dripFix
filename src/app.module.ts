@@ -9,8 +9,7 @@ import { AuthenticationGuard } from './core/guards';
 import { LoggingInterceptor, ResponseInterceptor } from './core/interceptors';
 import { FirestoreModule, HttpModule, RedisModule } from './core/providers';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { UserModule } from './module';
 
 @Module({
   imports: [
@@ -20,13 +19,11 @@ import { AppService } from './app.service';
     AuthModule,
 
     FirestoreModule.forRoot({
-      useFactory: () => ({
-        projectId: process.env.GCLOUD_PROJECT_ID,
-        credentials: {
-          client_email: process.env.GCLOUD_CLIENT_EMAIL,
-          private_key: process.env.GCLOUD_PRIVATE_KEY,
-        },
-      }),
+      projectId: process.env.GCLOUD_PROJECT_ID,
+      credentials: {
+        client_email: process.env.GCLOUD_CLIENT_EMAIL,
+        private_key: process.env.GCLOUD_PRIVATE_KEY,
+      },
     }),
 
     RedisModule.forRoot({
@@ -40,9 +37,10 @@ import { AppService } from './app.service';
         maxRedirects: +process.env.HTTP_MAX_REDIRECTS,
       }),
     }),
-  ],
 
-  controllers: [AppController],
+    //? Modules
+    UserModule,
+  ],
 
   providers: [
     {
@@ -69,8 +67,6 @@ import { AppService } from './app.service';
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
-
-    AppService,
   ],
 })
 export class AppModule {}

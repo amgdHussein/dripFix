@@ -9,27 +9,47 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-  "typescript.inlayHints.parameterNames.enabled": "all", // Development
-  "typescript.inlayHints.parameterTypes.enabled": true,
-  "typescript.preferences.importModuleSpecifier": "relative", // Deployment
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-
   "editor.codeActionsOnSave": {
     "source.fixAll": "never",
     "source.organizeImports": "explicit"
   },
 
+  // Inlay Hints
+  "typescript.inlayHints.parameterNames.enabled": "all", // Development
+  "typescript.inlayHints.parameterTypes.enabled": true,
+  "typescript.preferences.importModuleSpecifier": "relative", // Deployment
+
+  // Formatters
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+
+  // Lint
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.codeAction.showDocumentation": {
     "enable": true
   },
-
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 
   // To better view
   "typelens.unusedcolor": "None",
 
   // Unknown words
-  "cSpell.words": ["amgad", "datasource", "datasources", "dtos", "firestore", "gcloud", "nestjs", "redishost", "redisport", "usecases"]
+  "cSpell.words": [
+    "amgad",
+    "arcoay",
+    "datasource",
+    "datasources",
+    "dtos",
+    "firestore",
+    "gcloud",
+    "nestjs",
+    "redishost",
+    "redisport",
+    "usecase",
+    "usecases"
+  ]
 }

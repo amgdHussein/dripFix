@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { useContainer } from 'class-validator';
 import * as basicAuth from 'express-basic-auth';
 
 import { AppModule } from './app.module';
@@ -21,6 +22,10 @@ async function bootstrap(): Promise<void> {
 
   // Enable Cross-Origin Resource Sharing (CORS)
   app.enableCors();
+
+  // Inject service to validator constraint interface
+  //* Class-validator requires you to use service containers if you want to inject dependencies into your custom validator constraint classes
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // Create the Swagger documentation configuration
   const config = new DocumentBuilder()
