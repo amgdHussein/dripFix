@@ -15,7 +15,7 @@ export class QueryParamDto implements QueryParam {
     type: String,
     required: true,
     example: 'displayName',
-    description: 'The key field to filter by',
+    description: 'The key field to query by',
   })
   readonly key: string;
 
@@ -27,7 +27,7 @@ export class QueryParamDto implements QueryParam {
     type: String,
     required: true,
     example: 'eq',
-    description: 'Filter operator',
+    description: 'Query operator',
   })
   readonly operator: QueryOp;
 
@@ -37,7 +37,7 @@ export class QueryParamDto implements QueryParam {
     type: Object,
     required: true,
     example: 'Amgad Hussein',
-    description: 'The field value',
+    description: 'The key value in database',
   })
   readonly value: ParamType;
 }
@@ -73,7 +73,7 @@ export class QueryResultDto<T> implements SearchResult<T> {
     example: [],
     description: 'The items fetched',
   })
-  output: T[];
+  readonly output: T[];
 
   @ApiProperty({
     name: 'page',
@@ -81,7 +81,7 @@ export class QueryResultDto<T> implements SearchResult<T> {
     example: 1,
     description: 'The current page number',
   })
-  page: number;
+  readonly page: number;
 
   @ApiProperty({
     name: 'pages',
@@ -89,15 +89,15 @@ export class QueryResultDto<T> implements SearchResult<T> {
     example: 5,
     description: 'The total number of pages',
   })
-  pages: number;
+  readonly pages: number;
 
   @ApiProperty({
-    name: 'per_page',
+    name: 'perPage',
     type: Number,
     example: 10,
     description: 'The number of items per page',
   })
-  per_page: number;
+  readonly perPage: number;
 
   @ApiProperty({
     name: 'total',
@@ -105,7 +105,7 @@ export class QueryResultDto<T> implements SearchResult<T> {
     example: 50,
     description: 'The total number of items',
   })
-  total: number;
+  readonly total: number;
 }
 
 export class QueryDto {
@@ -120,7 +120,7 @@ export class QueryDto {
     example: 2,
     description: 'The page number to fetch data from (starting offset)',
   })
-  page: number;
+  readonly page?: number;
 
   @IsOptional()
   @Transform(({ value }) => Number(value))
@@ -133,7 +133,7 @@ export class QueryDto {
     example: 100,
     description: 'The number of required entities',
   })
-  limit: number;
+  readonly limit?: number;
 
   @IsOptional()
   @Transform(({ value }) => {
@@ -141,13 +141,13 @@ export class QueryDto {
   })
   @ValidateNested({ each: true })
   @ApiProperty({
-    name: 'filters',
+    name: 'params',
     type: String,
     required: false,
     example: 'name:eq:Amgad Hussein',
     description: 'The sorting operation applied for current request',
   })
-  params: QueryParamDto[];
+  readonly params?: QueryParamDto[];
 
   @IsOptional()
   @Transform(({ value }) => {
@@ -162,5 +162,5 @@ export class QueryDto {
     example: 'createdAt:desc',
     description: 'The sorting operation applied for current request',
   })
-  orderBy: QueryOrderDto;
+  readonly orderBy?: QueryOrderDto;
 }

@@ -245,7 +245,7 @@ export class FirestoreService<T extends { id: string }> {
       output: data, // items
       page: page, // current page
       pages: Math.ceil(entities / limit), // number of pages
-      per_page: limit, // number of items per page
+      perPage: limit, // number of items per page
       total: entities, // total number of items exists
     };
   }

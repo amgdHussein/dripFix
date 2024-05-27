@@ -17,10 +17,10 @@ export class ResponseInterceptor implements NestInterceptor {
     const request = httpContext.getRequest();
 
     const response = next.handle().pipe<Response>(
-      map((output): Response => {
+      map((data): Response => {
         return {
-          result: output,
-          isArray: Array.isArray(output),
+          result: data,
+          isArray: Array.isArray(data?.output),
           path: request.path,
           duration: `${Date.now() - now}ms`,
           method: request.method,
