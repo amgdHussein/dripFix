@@ -37,9 +37,8 @@ export class LoggingInterceptor implements NestInterceptor {
         },
         error: exception => {
           // Get the cause of the error (custom exception or validation pipe exception)
-          const exceptionResponse = exception?.getResponse();
-          const cause: string | string[] = (exception.cause as Error)?.message || (exceptionResponse as any)?.message || exceptionResponse;
-          const message: string = (exceptionResponse as any)?.error || exception.message || exceptionResponse;
+          const cause: string | string[] = (exception as any)?.response?.message || exception?.cause;
+          const message: string = (exception.message || exception) as string;
 
           this.logger.error(
             `statusCode=${exception.status} error="${message}" cause="${[cause].flat().join(', ')}"`,
