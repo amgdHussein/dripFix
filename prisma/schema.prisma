@@ -6,11 +6,71 @@
 
 // Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
 
+// npx prisma migrate dev --name init --create-only
+// npx prisma migrate deploy
+
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
     provider = "postgresql"
-    url      = env("POSTGRES_DATABASE_URL")
+    url      = env("DATABASE_URL")
 }
+
+enum Role {
+    USER
+    ADMIN
+}
+
+model User {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    name      String
+    role      Role     @default(USER)
+    active    Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Profile   Profile?
+    Address   Address?
+    Phone     Phone?
+}
+
+model Address {
+    id         String  @id @default(uuid())
+    user       User    @relation(fields: [userId], references: [id])
+    userId     String  @unique
+    city       String
+    country    String
+    line1      String
+    line2      String?
+    postalCode String?
+    state      String
+}
+
+model Phone {
+    id      String @id @default(uuid())
+    user    User   @relation(fields: [userId], references: [id])
+    userId  String @unique
+    country String
+    code    String
+    value   String
+}
+
+model Profile {
+    id       String  @id @default(uuid())
+    user     User    @relation(fields: [userId], references: [id])
+    userId   String  @unique
+    bio      String?
+    photoUrl String?
+}
+
+// model ServiceProvider {
+//     id          Int     @id @default(autoincrement())
+//     email       String  @unique
+//     name        String?
+//     phoneNumber String  @unique
+//     // Skills/expertise (e.g., mechanical, towing, etc.)
+//     // Availability status
+//     // Average rating
+// }

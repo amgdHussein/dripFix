@@ -12,7 +12,7 @@ export class UpdateUser implements Usecase {
   ) {}
 
   public async execute(user: Partial<User> & { id: string }): Promise<User> {
-    user.updatedAt = new Date().toISOString();
+    user.updatedAt = new Date();
     return await this.userService.updateUser(user);
   }
 }

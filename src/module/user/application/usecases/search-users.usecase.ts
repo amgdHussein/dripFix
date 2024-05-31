@@ -11,7 +11,7 @@ export class SearchUsers implements Usecase {
     private readonly userService: IUserService,
   ) {}
 
-  public async execute(page: number = 1, limit: number = 10, params?: QueryParam[], orderBy?: QueryOrder): Promise<SearchResult<User>> {
-    return await this.userService.searchUsers(page, limit, params, orderBy);
+  public async execute(page: number = 1, limit: number = 10, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
+    return await this.userService.searchUsers(page, limit, params, order);
   }
 }

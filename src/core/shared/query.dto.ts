@@ -8,6 +8,7 @@ import { ParamType, QueryOp, QueryParam } from './query-param.interface';
 import { SearchResult } from './search-result.interface';
 
 export class QueryParamDto implements QueryParam {
+  // TODO: CHECK IF THE KEY EXIST IN CLASS (USER, PROFILE, ...)
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -57,20 +58,20 @@ export class QueryOrderDto implements QueryOrder {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   @ApiProperty({
-    name: 'direction',
+    name: 'dir',
     type: String,
     required: true,
     example: 'asc',
     description: 'To sort data in ascending or descending manner',
   })
-  readonly dir: SortDirection = 'asc';
+  readonly dir: SortDirection;
 }
 
 export class QueryResultDto<T> implements SearchResult<T> {
   @ApiProperty({
     name: 'output',
-    type: Array<any>,
-    example: [],
+    type: Array<T>,
+    // example: [],
     description: 'The items fetched',
   })
   readonly output: T[];
@@ -137,7 +138,7 @@ export class QueryDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    return Utils.SearchQueryBuilder.decode(value).map(param => plainToClass(QueryParamDto, param));
+    return Utils.QueryBuilder.decode(value).map(param => plainToClass(QueryParamDto, param));
   })
   @ValidateNested({ each: true })
   @ApiProperty({
@@ -151,16 +152,16 @@ export class QueryDto {
 
   @IsOptional()
   @Transform(({ value }) => {
-    const [key, direction] = value.split(':');
-    return plainToClass(QueryOrderDto, { key: key.trim(), direction: direction.trim() });
+    const [key, dir] = value.split(':');
+    return plainToClass(QueryOrderDto, { key, dir });
   })
   @ValidateNested()
   @ApiProperty({
-    name: 'orderBy',
+    name: 'order',
     type: String,
     required: false,
     example: 'createdAt:desc',
     description: 'The sorting operation applied for current request',
   })
-  readonly orderBy?: QueryOrderDto;
+  readonly order?: QueryOrderDto;
 }

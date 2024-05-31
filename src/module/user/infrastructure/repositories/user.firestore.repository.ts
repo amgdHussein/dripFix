@@ -32,12 +32,12 @@ export class UserFirebaseRepository implements IUserRepository {
     return this.userCollection.setDoc(user);
   }
 
-  public async search(page: number, limit: number, params?: QueryParam[], orderBy?: QueryOrder): Promise<SearchResult<User>> {
-    return this.userCollection.query(page, limit, params, orderBy);
+  public async search(page: number, limit: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
+    return this.userCollection.query(page, limit, params, order);
   }
 
-  public async delete(id: string): Promise<void> {
-    await this.userCollection.deleteDoc(id);
+  public async delete(id: string): Promise<User> {
+    return await this.userCollection.deleteDoc(id);
   }
 
   public async fetchAll(): Promise<User[]> {

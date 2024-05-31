@@ -87,3 +87,17 @@ export function dropUndefined(obj: any): any {
 
   return obj;
 }
+
+/**
+ * Returns an array of field names of the given class constructor.
+ *
+ * @param {new (...args: any[]) => T} classConstructor - The class constructor to get the fields of.
+ * @return {string[]} An array of field names.
+ * @example
+ *  const fields = getClassFields(User);
+ *  console.log(fields); // ["id", "name", "email", "active", "role", "createdAt", "updatedAt"]
+ */
+export function getClassFields<T>(classConstructor: { new (...args: any[]): T }): string[] {
+  const instance = new classConstructor(...Array.from({ length: classConstructor.length }).map(() => undefined));
+  return Object.keys(instance);
+}

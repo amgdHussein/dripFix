@@ -19,8 +19,8 @@ export class UserService implements IUserService {
     return this.userRepository.fetchAll();
   }
 
-  public async searchUsers(page?: number, limit?: number, params?: QueryParam[], orderBy?: QueryOrder): Promise<SearchResult<User>> {
-    return this.userRepository.search(page, limit, params, orderBy);
+  public async searchUsers(page?: number, limit?: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
+    return this.userRepository.search(page, limit, params, order);
   }
 
   public async createUser(user: Partial<User>): Promise<User> {
@@ -43,7 +43,7 @@ export class UserService implements IUserService {
     return this.userRepository.overwrite(user);
   }
 
-  public async deleteUser(id: string): Promise<void> {
+  public async deleteUser(id: string): Promise<User> {
     return this.userRepository.delete(id);
   }
 

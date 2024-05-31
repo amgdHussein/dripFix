@@ -222,14 +222,14 @@ export class FirestoreService<T extends { id: string }> {
    * @param {number} page Pagination to prevent data overload
    * @param {number} limit Number of entities per page
    * @param {Array<QueryParam>} filters - List of QueryParam each filter has its own {field, operator, value}
-   * @param {QueryOrder} orderBy - Order object that contains {field, direction} to sort by field in specified direction
+   * @param {QueryOrder} order - Order object that contains {field, direction} to sort by field in specified direction
    * @return {Promise<SearchResult<T>>} The query documents data and meta data
    */
-  public async query(page: number = 1, limit: number = 30, params?: QueryParam[], orderBy?: QueryOrder): Promise<SearchResult<T>> {
+  public async query(page: number = 1, limit: number = 30, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<T>> {
     let queries: Query<T> = this.buildQuery(params).withConverter<T>(this.firestoreConverter);
     const entities: number = (await queries.count().get()).data().count;
 
-    if (orderBy) queries = queries.orderBy(orderBy.key, orderBy.dir);
+    if (order) queries = queries.orderBy(order.key, order.dir);
     if (page > 0 && limit > 0) queries = queries.offset(limit * (page - 1));
     if (limit > 0) queries = queries.limit(limit);
 

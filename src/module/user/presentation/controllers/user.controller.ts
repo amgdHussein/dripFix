@@ -38,6 +38,7 @@ export class UserController {
     return this.fetchUserUsecase.execute(id);
   }
 
+  @Public()
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({
@@ -98,8 +99,8 @@ export class UserController {
     description: 'A list of users that match the query parameters',
   })
   public async searchUsers(@Query() query: QueryDto): Promise<QueryResultDto<UserDto>> {
-    const { page, limit, params, orderBy } = query;
-    return this.searchUsersUsecase.execute(page, limit, params, orderBy);
+    const { page, limit, params, order } = query;
+    return this.searchUsersUsecase.execute(page, limit, params, order);
   }
 
   @Get('delete/:id')
@@ -111,8 +112,11 @@ export class UserController {
     required: true,
     description: 'The ID of the user to be deleted',
   })
-  @ApiResponse({ description: 'The response after deleting the user' })
-  public async deleteUser(@Param('id') id: string): Promise<void> {
+  @ApiResponse({
+    type: UserDto,
+    description: 'The response after deleting the user',
+  })
+  public async deleteUser(@Param('id') id: string): Promise<UserDto> {
     return this.deleteUserUsecase.execute(id);
   }
 }

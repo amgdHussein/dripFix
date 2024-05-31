@@ -6,7 +6,6 @@ import { IUserService, USER_SERVICE_PROVIDER, UserNotActiveException } from '../
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsUserActiveConstraint implements ValidatorConstraintInterface {
-  private message: string = 'user is not active';
   constructor(
     @Inject(USER_SERVICE_PROVIDER)
     private readonly userService: IUserService,
@@ -27,7 +26,7 @@ export class IsUserActiveConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsUserActive(validationOptions?: ValidationOptions) {
+export function IsUserActive(validationOptions?: ValidationOptions): Function {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,

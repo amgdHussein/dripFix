@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsDateString, IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { Role } from '../../../../core/constants';
 import { User } from '../../domain';
@@ -42,24 +43,25 @@ export class UserDto implements User {
   @ApiProperty({
     name: 'active',
     type: Boolean,
-    required: true,
+    required: false,
     example: true,
     description: 'Indicate whither the user is active or not',
   })
   active: boolean;
 
+  @IsString()
   @IsNotEmpty()
-  @IsEnum(Role)
+  @IsIn(['ADMIN', 'USER'])
   @ApiProperty({
     name: 'role',
-    enum: Role,
-    required: true,
-    example: Role.USER,
+    required: false,
+    example: 'USER',
     description: 'The role of the user',
   })
   role: Role;
 
   @IsDateString()
+  @Transform(({ value }) => new Date(value))
   @ApiProperty({
     name: 'createdAt',
     type: Date,
@@ -67,9 +69,10 @@ export class UserDto implements User {
     example: '2024-05-27T07:07:56.558Z',
     description: 'The date when the user created.',
   })
-  createdAt: string;
+  createdAt: Date;
 
   @IsDateString()
+  @Transform(({ value }) => new Date(value))
   @ApiProperty({
     name: 'updateAt',
     type: Number,
@@ -77,5 +80,5 @@ export class UserDto implements User {
     example: '2024-05-27T07:07:56.558Z',
     description: 'The date when the user updated.',
   })
-  updatedAt: string;
+  updatedAt: Date;
 }

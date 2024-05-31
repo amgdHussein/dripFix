@@ -1,4 +1,4 @@
-import { ApiProperty, IntersectionType, OmitType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
 import { IsNotEmpty, IsString } from 'class-validator';
 
@@ -16,10 +16,7 @@ class ActiveUserIdDto {
     example: 'vqOgmOTNaxYucTIrZAZ8',
     description: 'The unique identifier of the user',
   })
-  id: string;
+  readonly id: string;
 }
 
-export class UpdateUserDto extends IntersectionType(
-  ActiveUserIdDto,
-  PartialType(OmitType(UserDto, ['id', 'role', 'active', 'createdAt', 'updatedAt'])),
-) {}
+export class UpdateUserDto extends IntersectionType(ActiveUserIdDto, PartialType(PickType(UserDto, ['name', 'email']))) {}

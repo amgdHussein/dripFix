@@ -8,6 +8,7 @@ import { ExceptionFilter } from './core/filters';
 import { AuthenticationGuard } from './core/guards';
 import { LoggingInterceptor, ResponseInterceptor } from './core/interceptors';
 import { FirestoreModule, HttpModule, RedisModule } from './core/providers';
+import { PrismaModule } from './core/providers/prisma';
 
 import { UserModule } from './module';
 
@@ -37,6 +38,8 @@ import { UserModule } from './module';
         maxRedirects: +process.env.HTTP_MAX_REDIRECTS,
       }),
     }),
+
+    PrismaModule.forRoot(),
 
     //? Modules
     UserModule,

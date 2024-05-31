@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { ActivateUser, CreateUser, DeleteUser, FetchUser, IsUserActiveConstraint, SearchUsers, UpdateUser } from './application';
 import { USER_REPOSITORY_PROVIDER, USER_SERVICE_PROVIDER, USER_USECASE_PROVIDERS } from './domain';
-import { UserFirebaseRepository, UserService } from './infrastructure';
+import { UserPostgresRepository, UserService } from './infrastructure';
 import { UserController } from './presentation';
 
 const validators = [IsUserActiveConstraint];
@@ -15,7 +15,7 @@ const validators = [IsUserActiveConstraint];
 
     {
       provide: USER_REPOSITORY_PROVIDER,
-      useClass: UserFirebaseRepository,
+      useClass: UserPostgresRepository,
     },
     {
       provide: USER_SERVICE_PROVIDER,
