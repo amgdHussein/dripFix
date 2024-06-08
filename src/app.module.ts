@@ -7,8 +7,7 @@ import { AuthModule } from './core/auth';
 import { ExceptionFilter } from './core/filters';
 import { AuthenticationGuard } from './core/guards';
 import { LoggingInterceptor, ResponseInterceptor } from './core/interceptors';
-import { FirestoreModule, HttpModule, RedisModule } from './core/providers';
-import { PrismaModule } from './core/providers/prisma';
+import { FirestoreModule, HttpModule, PrismaModule, RedisModule } from './core/providers';
 
 import { UserModule } from './module';
 

@@ -1,13 +1,12 @@
-import { Injectable } from '@nestjs/common';
-
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
-
-import { UnauthorizedException } from '../exceptions';
 import { Role } from '../constants';
+import { FirebaseAuthException } from './auth.exception';
 
 @Injectable()
 export class AuthService {
+  private logger: Logger = new Logger(AuthService.name);
   private app: firebase.app.App;
 
   constructor() {
@@ -15,7 +14,7 @@ export class AuthService {
       credential: firebase.credential.cert({
         projectId: process.env.GCLOUD_PROJECT_ID,
         clientEmail: process.env.GCLOUD_CLIENT_EMAIL,
-        privateKey: process.env.GCLOUD_PRIVATE_KEY,
+        privateKey: process.env.GCLOUD_PRIVATE_KEY.replace(/\\n/g, '\n'), // handle multiline private key
       }),
     });
   }
@@ -26,16 +25,17 @@ export class AuthService {
    * @return {Promise<DecodedIdToken>} the decoded ID token
    */
   public async validateUser(token: string): Promise<DecodedIdToken> {
-    const claims = await this.app
-      .auth()
-      .verifyIdToken(token, true)
-      .catch(error => {
-        console.log('🚀 ~ AuthService ~ validateUser ~ error:', error);
-        throw new UnauthorizedException('User not authenticated!');
-      });
-
-    if (claims.email_verified) return claims;
-    throw new UnauthorizedException('Unverified user, please verify your email!');
+    try {
+      const claims = await this.app.auth().verifyIdToken(token, true);
+      if (!claims.email_verified) {
+        this.logger.warn('Unverified user, please verify your email!');
+        throw new FirebaseAuthException('Unverified user, please verify your email!');
+      }
+      return claims;
+    } catch (error) {
+      this.logger.error('User not authenticated!', error.stack);
+      throw new FirebaseAuthException('User not authenticated!');
+    }
   }
 
   /**
@@ -45,10 +45,16 @@ export class AuthService {
    * @return {boolean} Whether the user has the required roles
    */
   public validateUserRole(userRoles: Role[], requiredRoles: Role[]): boolean {
+    if (!userRoles || !requiredRoles) {
+      this.logger.error('User roles or required roles are missing!');
+      throw new ForbiddenException('User roles or required roles are missing!');
+    }
+
     const hasRole = userRoles.some(role => requiredRoles.includes(role));
 
-    if (userRoles.length === 0 && !hasRole) {
-      throw new UnauthorizedException('User does not have required roles!');
+    if (userRoles.length === 0 || !hasRole) {
+      this.logger.warn('User does not have required roles!');
+      throw new ForbiddenException('User does not have required roles!');
     }
 
     return hasRole;
