@@ -1,4 +1,4 @@
-import { Repository } from '../../../../core/shared';
+import { Repository } from '../../../../core/interfaces';
 import { User } from '../entities';
 
 export interface IUserRepository extends Repository<User> {

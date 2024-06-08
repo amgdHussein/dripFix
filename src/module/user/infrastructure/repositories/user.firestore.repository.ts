@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { DB_PROVIDER, FIRESTORE_PROVIDER } from '../../../../core/constants';
 import { FirestoreService } from '../../../../core/providers';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
 
 import { IUserRepository, User } from '../../domain';
 
@@ -32,7 +32,7 @@ export class UserFirebaseRepository implements IUserRepository {
     return this.userCollection.setDoc(user);
   }
 
-  public async search(page: number, limit: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
+  public async search(page: number = 1, limit: number = 20, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
     return this.userCollection.query(page, limit, params, order);
   }
 

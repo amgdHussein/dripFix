@@ -1,4 +1,4 @@
-import { ParamType, QueryOp, QueryParam } from '../shared';
+import { ParamType, QueryOp, QueryParam } from '../shared/query';
 
 /**
  * SearchQueryBuilder is a utility class for constructing and decoding search query parameters.
@@ -117,10 +117,10 @@ export class SearchQueryBuilder {
     return queryString.split(';').map(pair => {
       const [key, operator, encodedValue] = pair.split(':');
       // TODO: Handle incoming values that are not encoded
-      const decodedValue = decodeURIComponent(encodedValue);
-      //   const decodedValue = encodedValue;
+      //   const decodedValue = decodeURIComponent(encodedValue);
+      const decodedValue = encodedValue;
 
-      let value: ParamType;
+      let value: ParamType | ParamType[];
       if (operator === 'in' || operator === 'nin' || operator === 'arco' || operator === 'arcoay') {
         value = decodedValue.split(',').map(v => (!isNaN(Number(v)) ? Number(v) : v));
       } else if (decodedValue === 'true' || decodedValue === 'false') {

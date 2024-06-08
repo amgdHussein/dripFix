@@ -1,28 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { plainToClass, Transform } from 'class-transformer';
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { Transform, plainToClass } from 'class-transformer';
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
-import { Utils } from '../utils';
-import { QueryOrder, SortDirection } from './query-order.interface';
-import { ParamType, QueryOp, QueryParam } from './query-param.interface';
-import { SearchResult } from './search-result.interface';
+import { ParamType, QueryOp, QueryOrder, QueryParam, SearchResult, SortDirection } from '../../../../core/shared/query';
+import { Utils } from '../../../../core/utils';
 
-export class QueryParamDto implements QueryParam {
-  // TODO: CHECK IF THE KEY EXIST IN CLASS (USER, PROFILE, ...)
-  @IsString()
-  @IsNotEmpty()
+import { UserDto } from './user.dto';
+
+export class UserQueryParamDto implements QueryParam {
+  @IsIn([['id', 'name', 'email', 'active', 'role', 'createdAt', 'updatedAt']])
   @ApiProperty({
     name: 'key',
     type: String,
     required: true,
-    example: 'displayName',
+    example: 'email',
     description: 'The key field to query by',
   })
   readonly key: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @IsIn(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'nin', 'arcoay', 'arco'])
+  @IsIn(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in', 'nin'])
   @ApiProperty({
     name: 'operator',
     type: String,
@@ -32,20 +28,18 @@ export class QueryParamDto implements QueryParam {
   })
   readonly operator: QueryOp;
 
-  @IsNotEmpty()
   @ApiProperty({
     name: 'value',
     type: Object,
     required: true,
-    example: 'Amgad Hussein',
-    description: 'The key value in database',
+    example: 'amgad.hussein@example.com',
+    description: 'The key value in database only (string, number, boolean, Date) are allowed',
   })
   readonly value: ParamType;
 }
 
-export class QueryOrderDto implements QueryOrder {
-  @IsString()
-  @IsNotEmpty()
+export class UserQueryOrderDto implements QueryOrder {
+  @IsIn(['id', 'createdAt', 'updatedAt'])
   @ApiProperty({
     name: 'key',
     type: String,
@@ -55,7 +49,6 @@ export class QueryOrderDto implements QueryOrder {
   })
   readonly key: string;
 
-  @IsOptional()
   @IsIn(['asc', 'desc'])
   @ApiProperty({
     name: 'dir',
@@ -67,14 +60,14 @@ export class QueryOrderDto implements QueryOrder {
   readonly dir: SortDirection;
 }
 
-export class QueryResultDto<T> implements SearchResult<T> {
+export class UserQueryResultDto implements SearchResult<UserDto> {
   @ApiProperty({
-    name: 'output',
-    type: Array<T>,
-    // example: [],
-    description: 'The items fetched',
+    name: 'data',
+    type: UserDto,
+    example: [UserDto],
+    description: 'The users fetched',
   })
-  readonly output: T[];
+  readonly data: UserDto[];
 
   @ApiProperty({
     name: 'page',
@@ -96,7 +89,7 @@ export class QueryResultDto<T> implements SearchResult<T> {
     name: 'perPage',
     type: Number,
     example: 10,
-    description: 'The number of items per page',
+    description: 'The number of users per page',
   })
   readonly perPage: number;
 
@@ -104,12 +97,12 @@ export class QueryResultDto<T> implements SearchResult<T> {
     name: 'total',
     type: Number,
     example: 50,
-    description: 'The total number of items',
+    description: 'The total number of users meet the query params',
   })
   readonly total: number;
 }
 
-export class QueryDto {
+export class UserQueryDto {
   @IsOptional()
   @Transform(({ value }) => Number(value))
   @IsNumber()
@@ -121,7 +114,7 @@ export class QueryDto {
     example: 2,
     description: 'The page number to fetch data from (starting offset)',
   })
-  readonly page?: number;
+  readonly page: number;
 
   @IsOptional()
   @Transform(({ value }) => Number(value))
@@ -134,11 +127,12 @@ export class QueryDto {
     example: 100,
     description: 'The number of required entities',
   })
-  readonly limit?: number;
+  readonly limit: number;
 
   @IsOptional()
+  @IsNotEmpty()
   @Transform(({ value }) => {
-    return Utils.QueryBuilder.decode(value).map(param => plainToClass(QueryParamDto, param));
+    return Utils.QueryBuilder.decode(value).map(param => plainToClass(UserQueryParamDto, param));
   })
   @ValidateNested({ each: true })
   @ApiProperty({
@@ -148,12 +142,13 @@ export class QueryDto {
     example: 'name:eq:Amgad Hussein',
     description: 'The sorting operation applied for current request',
   })
-  readonly params?: QueryParamDto[];
+  readonly params: UserQueryParamDto[];
 
   @IsOptional()
+  @IsNotEmpty()
   @Transform(({ value }) => {
     const [key, dir] = value.split(':');
-    return plainToClass(QueryOrderDto, { key, dir });
+    return plainToClass(UserQueryOrderDto, { key, dir });
   })
   @ValidateNested()
   @ApiProperty({
@@ -163,5 +158,5 @@ export class QueryDto {
     example: 'createdAt:desc',
     description: 'The sorting operation applied for current request',
   })
-  readonly order?: QueryOrderDto;
+  readonly order: UserQueryOrderDto;
 }

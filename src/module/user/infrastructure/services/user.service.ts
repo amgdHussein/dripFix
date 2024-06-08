@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
 
 import { IUserRepository, IUserService, User, USER_REPOSITORY_PROVIDER } from '../../domain';
 
@@ -19,7 +19,7 @@ export class UserService implements IUserService {
     return this.userRepository.fetchAll();
   }
 
-  public async searchUsers(page?: number, limit?: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
+  public async searchUsers(page: number, limit: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
     return this.userRepository.search(page, limit, params, order);
   }
 

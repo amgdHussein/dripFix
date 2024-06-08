@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { QueryOrder, QueryParam, SearchResult, Usecase } from '../../../../core/shared';
+import { Usecase } from '../../../../core/interfaces';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
 
 import { IUserService, User, USER_SERVICE_PROVIDER } from '../../domain';
 
 @Injectable()
-export class SearchUsers implements Usecase {
+export class SearchUsers implements Usecase<User> {
   constructor(
     @Inject(USER_SERVICE_PROVIDER)
     private readonly userService: IUserService,

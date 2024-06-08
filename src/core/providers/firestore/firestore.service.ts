@@ -16,7 +16,7 @@ import {
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
 import { Utils } from '../../utils';
 
-import { QueryOp, QueryOrder, QueryParam, SearchResult } from '../../shared';
+import { QueryOp, QueryOrder, QueryParam, SearchResult } from '../../shared/query';
 
 export class FirestoreService<T extends { id: string }> {
   private readonly logger = new Logger(FirestoreService.name);
@@ -242,7 +242,7 @@ export class FirestoreService<T extends { id: string }> {
       });
 
     return {
-      output: data, // items
+      data: data, // items
       page: page, // current page
       pages: Math.ceil(entities / limit), // number of pages
       perPage: limit, // number of items per page

@@ -1,13 +1,11 @@
 import { Body, Controller, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { QueryDto, QueryResultDto } from '../../../../core/shared';
-
 import { ActivateUser, CreateUser, DeleteUser, FetchUser, SearchUsers, UpdateUser } from '../../application';
 import { USER_USECASE_PROVIDERS } from '../../domain';
 
 import { Public } from '../../../../core/decorators';
-import { CreateUserDto, UpdateUserDto, UserDto } from '../dtos';
+import { CreateUserDto, UpdateUserDto, UserDto, UserQueryDto, UserQueryResultDto } from '../dtos';
 
 @ApiTags('Users')
 @Controller('users')
@@ -90,15 +88,15 @@ export class UserController {
   @Get()
   @ApiOperation({ summary: 'Search for users with optional filters' })
   @ApiBody({
-    type: QueryDto,
+    type: UserQueryDto,
     required: false,
     description: 'Query parameters for filtering and sorting users',
   })
   @ApiResponse({
-    type: QueryResultDto<UserDto>,
+    type: UserQueryResultDto,
     description: 'A list of users that match the query parameters',
   })
-  public async searchUsers(@Query() query: QueryDto): Promise<QueryResultDto<UserDto>> {
+  public async searchUsers(@Query() query: UserQueryDto): Promise<UserQueryResultDto> {
     const { page, limit, params, order } = query;
     return this.searchUsersUsecase.execute(page, limit, params, order);
   }

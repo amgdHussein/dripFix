@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { PRISMA_PROVIDER, PrismaService } from '../../../../core/providers/prisma';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared';
-
+import { PRISMA_PROVIDER, PrismaService } from '../../../../core/providers';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
 import { Utils } from '../../../../core/utils';
+
 import { IUserRepository, User } from '../../domain';
 
 @Injectable()
@@ -50,63 +50,61 @@ export class UserPostgresRepository implements IUserRepository {
   }
 
   public async search(page: number = 1, limit: number = 20, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
-    const where = params ? this.buildWhereCondition(params) : {};
+    const whereConditions = params ? this.buildWhereCondition(params) : undefined;
 
     // Execute count and findMany queries concurrently
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
-        where,
+        where: whereConditions,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: order ? { [order.key]: order.dir } : undefined,
       }),
-      this.prisma.user.count({ where }),
+      this.prisma.user.count({ where: whereConditions }),
     ]);
 
-    return { output: users, page, perPage: limit, pages: Math.ceil(total / limit), total };
-  }
-
-  public async delete(id: string): Promise<User> {
-    return this.prisma.user.delete({ where: { id } });
+    return new SearchResult<User>(users, page, Math.ceil(total / limit), limit, total);
   }
 
   private buildWhereCondition(params: QueryParam[]): any {
-    const whereCondition: any = {};
-
-    params.forEach(param => {
+    return params.reduce((conditions, param) => {
       const { operator, key, value } = param;
 
       switch (operator) {
         case 'eq':
-          whereCondition[key] = value;
+          conditions[key] = value;
           break;
         case 'neq':
-          whereCondition[key] = { not: value };
+          conditions[key] = { not: value };
           break;
         case 'gt':
-          whereCondition[key] = { gt: value };
+          conditions[key] = { gt: value };
           break;
         case 'gte':
-          whereCondition[key] = { gte: value };
+          conditions[key] = { gte: value };
           break;
         case 'lt':
-          whereCondition[key] = { lt: value };
+          conditions[key] = { lt: value };
           break;
         case 'lte':
-          whereCondition[key] = { lte: value };
+          conditions[key] = { lte: value };
           break;
         case 'in':
-          whereCondition[key] = { in: value as any[] };
+          conditions[key] = { in: value as any[] };
           break;
         case 'nin':
-          whereCondition[key] = { notIn: value as any[] };
+          conditions[key] = { notIn: value as any[] };
           break;
         default:
-          throw new Error(`Unsupported operator: ${operator}`);
+          throw new BadRequestException(`Unsupported operator: ${operator}`);
       }
-    });
 
-    return whereCondition;
+      return conditions;
+    }, {});
+  }
+
+  public async delete(id: string): Promise<User> {
+    return this.prisma.user.delete({ where: { id } });
   }
 
   public async fetchAll(): Promise<User[]> {
