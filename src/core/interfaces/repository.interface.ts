@@ -1,4 +1,4 @@
-import { QueryOrder, QueryParam, SearchResult } from '../shared/query';
+import { QueryOrder, QueryParam, SearchResult } from '../types';
 
 export interface Repository<T> {
   fetch(id: string): Promise<T>;

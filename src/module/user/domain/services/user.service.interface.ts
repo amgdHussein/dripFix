@@ -1,4 +1,4 @@
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
 import { User } from '../entities';
 
 export interface IUserService {

@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { DB_PROVIDER, FIRESTORE_PROVIDER } from '../../../../core/constants';
 import { FirestoreService } from '../../../../core/providers';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
 
 import { IUserRepository, User } from '../../domain';
 

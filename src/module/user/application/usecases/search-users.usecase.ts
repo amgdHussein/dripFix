@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Usecase } from '../../../../core/interfaces';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
 
 import { IUserService, User, USER_SERVICE_PROVIDER } from '../../domain';
 

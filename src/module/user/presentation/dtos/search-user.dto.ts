@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, plainToClass } from 'class-transformer';
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
-import { ParamType, QueryOp, QueryOrder, QueryParam, SearchResult, SortDirection } from '../../../../core/shared/query';
+import { ParamType, QueryOp, QueryOrder, QueryParam, SearchResult, SortDirection } from '../../../../core/types';
 import { Utils } from '../../../../core/utils';
 
 import { UserDto } from './user.dto';

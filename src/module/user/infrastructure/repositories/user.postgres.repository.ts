@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { PRISMA_PROVIDER, PrismaService } from '../../../../core/providers';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/shared/query';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
 import { Utils } from '../../../../core/utils';
 
 import { IUserRepository, User } from '../../domain';

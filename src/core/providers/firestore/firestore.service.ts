@@ -13,7 +13,7 @@ import {
   WithFieldValue,
 } from '@google-cloud/firestore';
 
-import { QueryOp, QueryOrder, QueryParam, SearchResult } from '../../shared/query';
+import { QueryOp, QueryOrder, QueryParam, SearchResult } from '../../types';
 import { Utils } from '../../utils';
 
 import { FirebaseFirestoreException } from './firestore.exception';

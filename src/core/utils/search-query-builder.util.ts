@@ -1,4 +1,4 @@
-import { ParamType, QueryOp, QueryParam } from '../shared/query';
+import { ParamType, QueryOp, QueryParam } from '../types';
 
 /**
  * SearchQueryBuilder is a utility class for constructing and decoding search query parameters.
