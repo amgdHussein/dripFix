@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Inject, Injectable } from '@nestjs/common';
 import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
 
@@ -26,8 +28,8 @@ export class IsUserActiveConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function IsUserActive(validationOptions?: ValidationOptions): Function {
-  return function (object: Object, propertyName: string) {
+export function IsUserActive(validationOptions?: ValidationOptions) {
+  return function (object: unknown, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

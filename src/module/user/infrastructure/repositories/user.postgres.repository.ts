@@ -66,7 +66,7 @@ export class UserPostgresRepository implements IUserRepository {
     return new SearchResult<User>(users, page, Math.ceil(total / limit), limit, total);
   }
 
-  private buildWhereCondition(params: QueryParam[]): any {
+  private buildWhereCondition(params: QueryParam[]): unknown {
     return params.reduce((conditions, param) => {
       const { operator, key, value } = param;
 
@@ -90,10 +90,10 @@ export class UserPostgresRepository implements IUserRepository {
           conditions[key] = { lte: value };
           break;
         case 'in':
-          conditions[key] = { in: value as any[] };
+          conditions[key] = { in: value };
           break;
         case 'nin':
-          conditions[key] = { notIn: value as any[] };
+          conditions[key] = { notIn: value };
           break;
         default:
           throw new BadRequestException(`Unsupported operator: ${operator}`);
