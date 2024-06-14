@@ -8,6 +8,7 @@
   "editor.formatOnType": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
 
   "editor.codeActionsOnSave": {
     "source.fixAll": "never",
