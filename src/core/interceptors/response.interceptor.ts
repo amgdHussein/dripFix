@@ -1,9 +1,9 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable, map } from 'rxjs';
 
 export interface Response {
   result: unknown;
-  isArray: boolean;
   path: string;
   duration: string;
   method: string;
@@ -11,23 +11,30 @@ export interface Response {
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  public intercept(context: ExecutionContext, next: CallHandler): Observable<Response> {
+  public intercept(context: ExecutionContext | GqlExecutionContext, next: CallHandler): Observable<Response> {
     const now = Date.now();
-    const httpContext = context.switchToHttp();
-    const request = httpContext.getRequest();
+    const contextType = context.getType() as string;
 
-    const response = next.handle().pipe<Response>(
-      map((data): Response => {
-        return {
-          result: data,
-          isArray: Array.isArray(data?.output),
-          path: request.path,
-          duration: `${Date.now() - now}ms`,
-          method: request.method,
-        };
-      }),
-    );
+    switch (contextType) {
+      case 'http': {
+        const httpContext = context.switchToHttp();
+        const request = httpContext.getRequest();
 
-    return response;
+        return next.handle().pipe<Response>(
+          map(data => {
+            return {
+              result: data,
+              path: request.path,
+              duration: `${Date.now() - now}ms`,
+              method: request.method,
+            };
+          }),
+        );
+      }
+
+      case 'graphql': {
+        return next.handle();
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
@@ -6,6 +6,7 @@ import { AuthStrategy } from './auth.strategy';
 
 import { AUTH_SERVICE_PROVIDER, AUTH_STRATEGY_PROVIDER } from '../constants';
 
+@Global()
 @Module({
   imports: [PassportModule],
   providers: [

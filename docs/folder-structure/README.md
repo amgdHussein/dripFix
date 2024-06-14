@@ -18,6 +18,10 @@
   │   ├── types
   │   └── utils
   │
+  ├── graphql
+  │   │
+  │   └── schema
+  │
   └── modules
       │
       ├── User
@@ -41,6 +45,7 @@
       │   │
       │   └── presentation
       │       ├── dtos
+      │       ├── resolvers
       │       └── controllers
       │
       ├── Driver/Mechanical

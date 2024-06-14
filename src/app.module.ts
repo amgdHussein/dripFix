@@ -3,6 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+
 import { AuthModule } from './core/auth';
 import { ExceptionFilter } from './core/filters';
 import { AuthenticationGuard } from './core/guards';
@@ -38,7 +41,13 @@ import { UserModule } from './module';
       }),
     }),
 
-    PrismaModule.forRoot(),
+    PrismaModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      installSubscriptionHandlers: true,
+      autoSchemaFile: './graphql/schema.graphql',
+      playground: process.env.APP_ENV == 'dev',
+    }),
 
     //? Modules
     UserModule,

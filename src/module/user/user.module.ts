@@ -3,15 +3,17 @@ import { Module } from '@nestjs/common';
 import { ActivateUser, CreateUser, DeleteUser, FetchUser, IsUserActiveConstraint, SearchUsers, UpdateUser } from './application';
 import { USER_REPOSITORY_PROVIDER, USER_SERVICE_PROVIDER, USER_USECASE_PROVIDERS } from './domain';
 import { UserPostgresRepository, UserService } from './infrastructure';
-import { UserController } from './presentation';
+import { UserController, UserResolver } from './presentation';
 
 const validators = [IsUserActiveConstraint];
+const resolvers = [UserResolver];
 
 @Module({
   imports: [],
   controllers: [UserController],
   providers: [
     ...validators,
+    ...resolvers,
 
     {
       provide: USER_REPOSITORY_PROVIDER,

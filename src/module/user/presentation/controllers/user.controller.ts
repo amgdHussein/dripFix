@@ -19,6 +19,7 @@ export class UserController {
     @Inject(USER_USECASE_PROVIDERS.DELETE_USER) private readonly deleteUserUsecase: DeleteUser,
   ) {}
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Fetch user by ID' })
   @ApiParam({
@@ -52,6 +53,7 @@ export class UserController {
     return this.createUserUsecase.execute(entity);
   }
 
+  @Public()
   @Post('active/:id')
   @ApiOperation({ summary: 'Activate an existing user' })
   @ApiParam({
@@ -69,6 +71,7 @@ export class UserController {
     return this.activateUserUsecase.execute(id);
   }
 
+  @Public()
   @Put()
   @ApiOperation({ summary: 'Update user information' })
   @ApiBody({
@@ -101,6 +104,7 @@ export class UserController {
     return this.searchUsersUsecase.execute(page, limit, params, order);
   }
 
+  @Public()
   @Get('delete/:id')
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiParam({
