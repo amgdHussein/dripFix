@@ -1,2 +1,2 @@
-export * from './user.firestore.repository';
+export * from './profile.postgres.repository';
 export * from './user.postgres.repository';

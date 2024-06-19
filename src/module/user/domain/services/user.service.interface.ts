@@ -9,7 +9,6 @@ export interface IUserService {
   createUsers(users: Partial<User>[]): Promise<User[]>;
   updateUser(users: Partial<User> & { id: string }): Promise<User>;
   updateUsers(users: (Partial<User> & { id: string })[]): Promise<User[]>;
-  overwriteUser(user: User): Promise<User>;
   deleteUser(id: string): Promise<User>;
   isUserActive(id: string): Promise<boolean>;
 }

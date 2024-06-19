@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Usecase } from '../../../../core/interfaces';
-import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
+import { Usecase } from '../../../../../core/interfaces';
+import { QueryOrder, QueryParam, SearchResult } from '../../../../../core/types';
 
-import { IUserService, User, USER_SERVICE_PROVIDER } from '../../domain';
+import { IUserService, User, USER_SERVICE_PROVIDER } from '../../../domain';
 
 @Injectable()
 export class SearchUsers implements Usecase<User> {

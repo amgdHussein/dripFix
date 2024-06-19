@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Usecase } from '../../../../core/interfaces';
+import { Usecase } from '../../../../../core/interfaces';
 
-import { IUserService, User, USER_SERVICE_PROVIDER } from '../../domain';
+import { IUserService, User, USER_SERVICE_PROVIDER } from '../../../domain';
 
 @Injectable()
 export class ActivateUser implements Usecase<User> {

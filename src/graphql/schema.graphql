@@ -1,14 +1,36 @@
-type User {
-  id: Int!
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ProfileSchema {
+  id: ID!
+  userId: String
+  bio: String
+  avatar: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: UserSchema
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type UserSchema {
+  id: ID!
   email: String!
   name: String!
-  role: String!y
   active: Boolean!
-  createdAt: String!
-  updatedAt: String!
+  role: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  profile: ProfileSchema
 }
 
 type Query {
-  user(id: Int!): User
-  users: [User!]!
+  user(id: String!): UserSchema!
+  users: [UserSchema!]!
+  profile(id: String!): ProfileSchema!
+  profiles: [ProfileSchema!]!
 }

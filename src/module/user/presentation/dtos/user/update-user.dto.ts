@@ -2,7 +2,7 @@ import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/sw
 
 import { IsNotEmpty, IsString } from 'class-validator';
 
-import { IsUserActive } from '../../application';
+import { IsUserActive } from '../../../application';
 import { UserDto } from './user.dto';
 
 class ActiveUserIdDto {
@@ -13,7 +13,7 @@ class ActiveUserIdDto {
     name: 'id',
     type: String,
     required: true,
-    example: 'vqOgmOTNaxYucTIrZAZ8',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     description: 'The unique identifier of the user',
   })
   readonly id: string;

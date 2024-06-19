@@ -1,22 +1,34 @@
 import { Body, Controller, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { Public } from '../../../../core/decorators';
+
 import { ActivateUser, CreateUser, DeleteUser, FetchUser, SearchUsers, UpdateUser } from '../../application';
 import { USER_USECASE_PROVIDERS } from '../../domain';
 
-import { Public } from '../../../../core/decorators';
 import { CreateUserDto, UpdateUserDto, UserDto, UserQueryDto, UserQueryResultDto } from '../dtos';
 
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(
-    @Inject(USER_USECASE_PROVIDERS.FETCH_USER) private readonly fetchUserUsecase: FetchUser,
-    @Inject(USER_USECASE_PROVIDERS.CREATE_USER) private readonly createUserUsecase: CreateUser,
-    @Inject(USER_USECASE_PROVIDERS.UPDATE_USER) private readonly updateUserUsecase: UpdateUser,
-    @Inject(USER_USECASE_PROVIDERS.SEARCH_USERS) private readonly searchUsersUsecase: SearchUsers,
-    @Inject(USER_USECASE_PROVIDERS.ACTIVATE_USER) private readonly activateUserUsecase: ActivateUser,
-    @Inject(USER_USECASE_PROVIDERS.DELETE_USER) private readonly deleteUserUsecase: DeleteUser,
+    @Inject(USER_USECASE_PROVIDERS.FETCH_USER)
+    private readonly fetchUserUsecase: FetchUser,
+
+    @Inject(USER_USECASE_PROVIDERS.CREATE_USER)
+    private readonly createUserUsecase: CreateUser,
+
+    @Inject(USER_USECASE_PROVIDERS.UPDATE_USER)
+    private readonly updateUserUsecase: UpdateUser,
+
+    @Inject(USER_USECASE_PROVIDERS.SEARCH_USERS)
+    private readonly searchUsersUsecase: SearchUsers,
+
+    @Inject(USER_USECASE_PROVIDERS.ACTIVATE_USER)
+    private readonly activateUserUsecase: ActivateUser,
+
+    @Inject(USER_USECASE_PROVIDERS.DELETE_USER)
+    private readonly deleteUserUsecase: DeleteUser,
   ) {}
 
   @Public()
@@ -25,7 +37,7 @@ export class UserController {
   @ApiParam({
     name: 'id',
     type: String,
-    example: 'vqOgmOTNaxYucTIrZAZ8',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     required: true,
     description: 'The ID of the user',
   })
@@ -34,6 +46,7 @@ export class UserController {
     description: 'The user with the specified ID',
   })
   public async fetchUser(@Param('id') id: string): Promise<UserDto> {
+    console.log('🚀 ~ UserController ~ fetchUser ~ id:', id);
     return this.fetchUserUsecase.execute(id);
   }
 
@@ -59,7 +72,7 @@ export class UserController {
   @ApiParam({
     name: 'id',
     type: String,
-    example: 'vqOgmOTNaxYucTIrZAZ8',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     required: true,
     description: 'The ID of the user to be activated',
   })
@@ -110,7 +123,7 @@ export class UserController {
   @ApiParam({
     name: 'id',
     type: String,
-    example: 'vqOgmOTNaxYucTIrZAZ8',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     required: true,
     description: 'The ID of the user to be deleted',
   })

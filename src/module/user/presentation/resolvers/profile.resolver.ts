@@ -6,8 +6,8 @@ import { Public } from '../../../../core/decorators';
 import { IProfileService, IUserService, PROFILE_SERVICE_PROVIDER, USER_SERVICE_PROVIDER } from '../../domain';
 import { ProfileSchema, UserSchema } from '../schemas';
 
-@Resolver(() => UserSchema)
-export class UserResolver {
+@Resolver(() => ProfileSchema)
+export class ProfileResolver {
   constructor(
     @Inject(USER_SERVICE_PROVIDER)
     private readonly userService: IUserService,
@@ -17,20 +17,20 @@ export class UserResolver {
   ) {}
 
   @Public()
-  @Query(() => UserSchema, { name: 'user' })
-  async fetchUser(@Args('id') id: string): Promise<UserSchema> {
-    return this.userService.fetchUser(id);
+  @Query(() => ProfileSchema, { name: 'profile' })
+  async fetchProfile(@Args('id') id: string): Promise<ProfileSchema> {
+    return this.profileService.fetchProfile(id);
   }
 
   @Public()
-  @Query(() => [UserSchema], { name: 'users' })
-  async fetchUsers(): Promise<UserSchema[]> {
-    return this.userService.fetchUsers();
+  @Query(() => [ProfileSchema], { name: 'profiles' })
+  async fetchProfiles(): Promise<ProfileSchema[]> {
+    return this.profileService.fetchProfiles();
   }
 
   @Public()
-  @ResolveField(() => ProfileSchema, { name: 'profile', nullable: true })
-  async fetchProfile(@Parent() user: UserSchema): Promise<ProfileSchema | null> {
-    return this.profileService.fetchUserProfile(user.id);
+  @ResolveField(() => UserSchema, { name: 'user', nullable: true })
+  async fetchUser(@Parent() profile: ProfileSchema): Promise<UserSchema | null> {
+    return this.userService.fetchUser(profile.userId);
   }
 }

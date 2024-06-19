@@ -8,47 +8,43 @@ import { IUserRepository, IUserService, User, USER_REPOSITORY_PROVIDER } from '.
 export class UserService implements IUserService {
   constructor(
     @Inject(USER_REPOSITORY_PROVIDER)
-    private readonly userRepository: IUserRepository,
+    private readonly userRepo: IUserRepository,
   ) {}
 
   public async fetchUser(id: string): Promise<User> {
-    return this.userRepository.fetch(id);
+    return this.userRepo.fetch(id);
   }
 
   public async fetchUsers(): Promise<User[]> {
-    return this.userRepository.fetchAll();
+    return this.userRepo.fetchAll();
   }
 
   public async searchUsers(page: number, limit: number, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
-    return this.userRepository.search(page, limit, params, order);
+    return this.userRepo.search(page, limit, params, order);
   }
 
   public async createUser(user: Partial<User>): Promise<User> {
-    return this.userRepository.create(user);
+    return this.userRepo.create(user);
   }
 
   public async createUsers(users: Partial<User>[]): Promise<User[]> {
-    return this.userRepository.createBatch(users);
+    return this.userRepo.createBatch(users);
   }
 
   public async updateUser(user: Partial<User> & { id: string }): Promise<User> {
-    return this.userRepository.update(user);
+    return this.userRepo.update(user);
   }
 
   public async updateUsers(users: (Partial<User> & { id: string })[]): Promise<User[]> {
-    return this.userRepository.updateBatch(users);
-  }
-
-  public async overwriteUser(user: User): Promise<User> {
-    return this.userRepository.overwrite(user);
+    return this.userRepo.updateBatch(users);
   }
 
   public async deleteUser(id: string): Promise<User> {
-    return this.userRepository.delete(id);
+    return this.userRepo.delete(id);
   }
 
   public async isUserActive(id: string): Promise<boolean> {
-    const user = await this.userRepository.fetch(id);
+    const user = await this.userRepo.fetch(id);
     return user && user.active;
   }
 }

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Usecase } from '../../../../core/interfaces';
+import { Usecase } from '../../../../../core/interfaces';
 
-import { IUserService, User, USER_SERVICE_PROVIDER } from '../../domain';
+import { IUserService, User, USER_SERVICE_PROVIDER } from '../../../domain';
 
 @Injectable()
 export class CreateUser implements Usecase<User> {
@@ -12,7 +12,6 @@ export class CreateUser implements Usecase<User> {
   ) {}
 
   public async execute(user: Partial<User>): Promise<User> {
-    user.createdAt = new Date();
     user.active = false;
     user.role = 'USER';
     return await this.userService.createUser(user);

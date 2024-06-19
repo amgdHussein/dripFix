@@ -2,18 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, plainToClass } from 'class-transformer';
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, Min, ValidateNested } from 'class-validator';
 
-import { ParamType, QueryOp, QueryOrder, QueryParam, SearchResult, SortDirection } from '../../../../core/types';
-import { Utils } from '../../../../core/utils';
+import { ParamType, QueryOp, QueryOrder, QueryParam, SearchResult, SortDirection } from '../../../../../core/types';
+import { Utils } from '../../../../../core/utils';
+import { ProfileDto } from './profile.dto';
 
-import { UserDto } from './user.dto';
-
-export class UserQueryParamDto implements QueryParam {
-  @IsIn([['id', 'name', 'email', 'active', 'role', 'createdAt', 'updatedAt']])
+export class ProfileQueryParamDto implements QueryParam {
+  @IsIn([['id', 'userId', 'createdAt', 'updatedAt']])
   @ApiProperty({
     name: 'key',
     type: String,
     required: true,
-    example: 'email',
+    example: 'userId',
     description: 'The key field to query by',
   })
   readonly key: string;
@@ -32,13 +31,13 @@ export class UserQueryParamDto implements QueryParam {
     name: 'value',
     type: Object,
     required: true,
-    example: 'amgad.hussein@example.com',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     description: 'The key value in database only (string, number, boolean, Date) are allowed',
   })
   readonly value: ParamType;
 }
 
-export class UserQueryOrderDto implements QueryOrder {
+export class ProfileQueryOrderDto implements QueryOrder {
   @IsIn(['id', 'createdAt', 'updatedAt'])
   @ApiProperty({
     name: 'key',
@@ -60,14 +59,14 @@ export class UserQueryOrderDto implements QueryOrder {
   readonly dir: SortDirection;
 }
 
-export class UserQueryResultDto implements SearchResult<UserDto> {
+export class ProfileQueryResultDto implements SearchResult<ProfileDto> {
   @ApiProperty({
     name: 'data',
-    type: UserDto,
-    example: [UserDto],
-    description: 'The users fetched',
+    type: ProfileDto,
+    example: [ProfileDto],
+    description: 'The users profiles fetched',
   })
-  readonly data: UserDto[];
+  readonly data: ProfileDto[];
 
   @ApiProperty({
     name: 'page',
@@ -89,7 +88,7 @@ export class UserQueryResultDto implements SearchResult<UserDto> {
     name: 'perPage',
     type: Number,
     example: 10,
-    description: 'The number of users per page',
+    description: 'The number of users profiles per page',
   })
   readonly perPage: number;
 
@@ -97,12 +96,12 @@ export class UserQueryResultDto implements SearchResult<UserDto> {
     name: 'total',
     type: Number,
     example: 50,
-    description: 'The total number of users meet the query params',
+    description: 'The total number of profiles meet the query params',
   })
   readonly total: number;
 }
 
-export class UserQueryDto {
+export class ProfileQueryDto {
   @IsOptional()
   @Transform(({ value }) => Number(value))
   @IsNumber()
@@ -132,7 +131,7 @@ export class UserQueryDto {
   @IsOptional()
   @IsNotEmpty()
   @Transform(({ value }) => {
-    return Utils.QueryBuilder.decode(value).map(param => plainToClass(UserQueryParamDto, param));
+    return Utils.QueryBuilder.decode(value).map(param => plainToClass(ProfileQueryParamDto, param));
   })
   @ValidateNested({ each: true })
   @ApiProperty({
@@ -142,13 +141,13 @@ export class UserQueryDto {
     example: 'name:eq:Amgad Hussein',
     description: 'The sorting operation applied for current request',
   })
-  readonly params: UserQueryParamDto[];
+  readonly params: ProfileQueryParamDto[];
 
   @IsOptional()
   @IsNotEmpty()
   @Transform(({ value }) => {
     const [key, dir] = value.split(':');
-    return plainToClass(UserQueryOrderDto, { key, dir });
+    return plainToClass(ProfileQueryOrderDto, { key, dir });
   })
   @ValidateNested()
   @ApiProperty({
@@ -158,5 +157,5 @@ export class UserQueryDto {
     example: 'createdAt:desc',
     description: 'The sorting operation applied for current request',
   })
-  readonly order: UserQueryOrderDto;
+  readonly order: ProfileQueryOrderDto;
 }

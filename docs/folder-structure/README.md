@@ -45,8 +45,9 @@
       │   │
       │   └── presentation
       │       ├── dtos
-      │       ├── resolvers
-      │       └── controllers
+      │       ├── controllers
+      │       ├── schemas
+      │       └── resolvers
       │
       ├── Driver/Mechanical
       │

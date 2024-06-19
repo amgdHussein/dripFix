@@ -1,1 +1,2 @@
-export * from './providers.constant';
+export * from './profile-providers.constant';
+export * from './user-providers.constant';

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { PRISMA_PROVIDER, PrismaService } from '../../../../core/providers';
 import { QueryOrder, QueryParam, SearchResult } from '../../../../core/types';
@@ -36,21 +36,8 @@ export class UserPostgresRepository implements IUserRepository {
     });
   }
 
-  public async overwrite(input: User): Promise<User> {
-    const { id, ...data } = input;
-
-    return this.prisma.user.update({
-      where: { id },
-      data: {
-        ...data,
-        createdAt: new Date(),
-        updatedAt: null,
-      },
-    });
-  }
-
   public async search(page: number = 1, limit: number = 20, params?: QueryParam[], order?: QueryOrder): Promise<SearchResult<User>> {
-    const whereConditions = params ? this.buildWhereCondition(params) : undefined;
+    const whereConditions = params ? this.prisma.buildWhereCondition(params) : undefined;
 
     // Execute count and findMany queries concurrently
     const [users, total] = await Promise.all([
@@ -64,43 +51,6 @@ export class UserPostgresRepository implements IUserRepository {
     ]);
 
     return new SearchResult<User>(users, page, Math.ceil(total / limit), limit, total);
-  }
-
-  private buildWhereCondition(params: QueryParam[]): unknown {
-    return params.reduce((conditions, param) => {
-      const { operator, key, value } = param;
-
-      switch (operator) {
-        case 'eq':
-          conditions[key] = value;
-          break;
-        case 'neq':
-          conditions[key] = { not: value };
-          break;
-        case 'gt':
-          conditions[key] = { gt: value };
-          break;
-        case 'gte':
-          conditions[key] = { gte: value };
-          break;
-        case 'lt':
-          conditions[key] = { lt: value };
-          break;
-        case 'lte':
-          conditions[key] = { lte: value };
-          break;
-        case 'in':
-          conditions[key] = { in: value };
-          break;
-        case 'nin':
-          conditions[key] = { notIn: value };
-          break;
-        default:
-          throw new BadRequestException(`Unsupported operator: ${operator}`);
-      }
-
-      return conditions;
-    }, {});
   }
 
   public async delete(id: string): Promise<User> {
@@ -121,7 +71,7 @@ export class UserPostgresRepository implements IUserRepository {
       });
     });
 
-    return await this.prisma.$transaction(updatePromises);
+    return this.prisma.$transaction(updatePromises);
   }
 
   public async createBatch(users: Partial<User>[]): Promise<User[]> {
@@ -135,6 +85,6 @@ export class UserPostgresRepository implements IUserRepository {
       });
     });
 
-    return await this.prisma.$transaction(createPromises);
+    return this.prisma.$transaction(createPromises);
   }
 }

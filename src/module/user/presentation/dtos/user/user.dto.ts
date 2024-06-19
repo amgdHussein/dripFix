@@ -2,12 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDateString, IsEmail, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Role } from '../../../../../core/constants';
 
-import { Role } from '../../../../core/constants';
-import { User } from '../../domain';
+import { User } from '../../../domain';
 
-@ObjectType()
 export class UserDto implements User {
   @IsString()
   @IsNotEmpty()
@@ -15,10 +13,9 @@ export class UserDto implements User {
     name: 'id',
     type: String,
     required: true,
-    example: 'vqOgmOTNaxYucTIrZAZ8',
+    example: 'a40d5019-d053-4477-81af-3808dbe62b31',
     description: 'The unique identifier of the user',
   })
-  @Field()
   id: string;
 
   @IsOptional()
@@ -30,7 +27,6 @@ export class UserDto implements User {
     example: 'amgad.hussein@example.com',
     description: 'The email address of the user',
   })
-  @Field()
   email: string;
 
   @IsString()
@@ -42,7 +38,6 @@ export class UserDto implements User {
     example: 'Amgad Hussein',
     description: 'The name of the user',
   })
-  @Field()
   name: string;
 
   @IsBoolean()
@@ -53,7 +48,6 @@ export class UserDto implements User {
     example: true,
     description: 'Indicate whither the user is active or not',
   })
-  @Field()
   active: boolean;
 
   @IsString()
@@ -65,7 +59,6 @@ export class UserDto implements User {
     example: 'USER',
     description: 'The role of the user',
   })
-  @Field()
   role: Role;
 
   @IsDateString()
@@ -77,7 +70,6 @@ export class UserDto implements User {
     example: '2024-05-27T07:07:56.558Z',
     description: 'The date when the user created.',
   })
-  @Field()
   createdAt: Date;
 
   @IsDateString()
@@ -89,6 +81,5 @@ export class UserDto implements User {
     example: '2024-05-27T07:07:56.558Z',
     description: 'The date when the user updated.',
   })
-  @Field()
   updatedAt: Date;
 }

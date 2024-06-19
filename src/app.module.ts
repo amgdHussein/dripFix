@@ -45,7 +45,7 @@ import { UserModule } from './module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       installSubscriptionHandlers: true,
-      autoSchemaFile: './graphql/schema.graphql',
+      autoSchemaFile: './src/graphql/schema.graphql',
       playground: process.env.APP_ENV == 'dev',
     }),
 
