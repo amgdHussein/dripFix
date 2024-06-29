@@ -44,9 +44,10 @@ import { UserModule } from './module';
     PrismaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      installSubscriptionHandlers: true,
-      autoSchemaFile: './src/graphql/schema.graphql',
-      playground: process.env.APP_ENV == 'dev',
+      installSubscriptionHandlers: true, // To listen to real time messages from the server.
+      playground: process.env.APP_ENV == 'dev', // Enable GraphQL playground (a graphical, interactive, in-browser GraphQL IDE) when on Dev.
+      include: [UserModule], // Use the include property to limit GraphQL's resolver search throughout the whole app to specific modules.
+      autoSchemaFile: './src/graphql/schema.graphql', // Automatically generated schema (use decorators on classes) will be created.
     }),
 
     //? Modules

@@ -1,17 +1,12 @@
 /**
- * User phone entity.
+ * Represents a user phone entity.
+ *
+ * @member {string} country - The 2-letter country code.
+ * @member {string} code - The phone code.
+ * @member {string} value - The phone number value.
  */
-export class Phone {
-  /**
-   * Initializes a new instance of the `Phone` class with the specified country, code, and value.
-   *
-   * @param {string} country - The 2-letter country code.
-   * @param {string} code - The phone code.
-   * @param {string} value - The phone number value.
-   */
-  constructor(
-    public country: string,
-    public code: string,
-    public value: string,
-  ) {}
+export interface Phone {
+  country: string;
+  code: string;
+  value: string;
 }

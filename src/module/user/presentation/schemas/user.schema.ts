@@ -28,7 +28,6 @@ export class UserSchema implements User {
   @Field()
   updatedAt: Date;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  @Field(type => ProfileSchema, { name: 'profile', nullable: true })
+  @Field(() => ProfileSchema, { name: 'profile', nullable: true })
   profile?: ProfileSchema;
 }
